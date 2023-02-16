@@ -1,15 +1,4 @@
-# The file contains the common information about Sonata Authentication
-
-### Table of contents
-
-* [Endpoints](#endpoints)
-
-# Endpoints
-* [/signup - to register the user](#signup-endpoint)
-* [/login - to login existed user](#login-endpoint)
-
-
-## Signup Endpoint
+# The file contains documentation about '/auth/signup' endpoint
 
 ``
 HTTP 1.1 curl -X POST -H  'application/json' /api/v1/auth/signup
@@ -41,14 +30,22 @@ Possible responses:
 ```json
 {
   "message": "To confirm your email we sent message to your email. Check it out",
-  "confirmation_url": "/api/v1/auth/email/verify",
-  "confirmation_url_http_methods": [
-      "GET"
-  ],
-  "confirmation_url_parameters": "code"
+  "confirmation_url": "/api/v1/auth/email/verify"
 }
 ```
+* confirmation_url - url to send the confirmation code to exchange the confirmation code to access token.
 
-* confirmation_url - url to send the confirmation code to exchange the confirmation code for access token.
-* confirmation_url_http_methods - supported HTTP methods by the 'confirmation_url'
-* confirmation_url_parameters - parameters 
+400 BAD REQUEST - if the request contains malformed email, invalid password, etc. 
+
+Example of the JSON response
+```json
+{
+  "status": "BAD_REQUEST",
+  "status_code": "400",
+  "error": {
+    "error_description": "The password is invalid, password must contain at least 8 characters and 1 number",
+    "error_possible_solution": "To fix the problem - input the correct password with required format"
+  }
+}
+```
+500 SERVER ERROR - If the request processing failed because server cannot process it

@@ -26,6 +26,7 @@ The example of valid JSON body:
 }
 ```
 Possible responses:
+
 200 OK - if registration was success, the HTTP 200 OK will be returned with following JSON body:
 ```json
 {
@@ -43,9 +44,17 @@ Example of the JSON response
   "status": "BAD_REQUEST",
   "status_code": "400",
   "error": {
-    "error_description": "The password is invalid, password must contain at least 8 characters and 1 number",
-    "error_possible_solution": "To fix the problem - input the correct password with required format"
+    "code": "invalid_password",
+    "description": "The password is invalid, password must contain at least 8 characters and 1 number",
+    "possible_solution": "To fix the problem - input the correct password with required format"
   }
 }
 ```
+JSON fields description:  
+* status - HTTP status name of the response code
+* status_code - HTTP status code of the response
+* error.code - unique identifier of the error
+* error.description - description about error
+* error.possible_solution - Possible way to fix the error 
+
 500 SERVER ERROR - If the request processing failed because server cannot process it

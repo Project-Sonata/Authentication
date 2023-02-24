@@ -1,0 +1,15 @@
+{
+  "status": 200,
+  "mfa_enabled": false,
+  "message": "The MFA is disabled",
+  "tokens": {
+    "access_token":{
+      "body": "user's token that can be used to access secured resources",
+      "expires_in": 3600
+    },
+    "refresh_token": {
+      "body": "refresh token that can be used to obtain a new access token",
+      "expires_in": 10000
+    }
+  }
+}

@@ -1,0 +1,130 @@
+package com.odeyalo.sonata.authentication.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.odeyalo.sonata.authentication.JsonTestUtils;
+import com.odeyalo.sonata.authentication.dto.error.ApiErrorDetailsInfo;
+import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.dto.response.UserRegistrationConfirmationResponseDto;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.hateoas.Link;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+
+/**
+ * The class contains the tests for the {@link AuthController}
+ */
+@SpringBootTest
+@AutoConfigureMockMvc
+class AuthControllerTest {
+
+    public static final String CONFIRMATION_URL_RELATION_NAME = "confirmation_url";
+    public static final String SELF_RELATION_NAME = "self";
+    @Autowired
+    private MockMvc mockMvc;
+
+    public static final String SIGNUP_ENDPOINT_NAME = "/auth/signup";
+
+    @Nested
+    class RegistrationAuthControllerTests {
+        /**
+         * The test case tests the '/auth/signup endpoint', the test purpose is to register the user with valid JSON body
+         * and expect valid response from controller.
+         */
+        @Test
+        @DisplayName("Should register the user in the system and return HTTP 200 OK with JSON body")
+        void shouldRegisterUser_andExceptHttp200() throws Exception {
+            // given
+            UserRegistrationInfo registrationInfo = getValidUserRegistrationInfo();
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+            String requestBody = mapper.writeValueAsString(registrationInfo);
+
+            // when
+            MvcResult mvcResult = mockMvc.perform(post(SIGNUP_ENDPOINT_NAME)
+                            .content(requestBody)
+                            .contentType(MediaType.APPLICATION_JSON)
+                    )
+                    .andDo(print())
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                    .andReturn();
+
+            //then
+            UserRegistrationConfirmationResponseDto responseBody = JsonTestUtils.convertToPojo(mvcResult, UserRegistrationConfirmationResponseDto.class);
+
+            String message = responseBody.getMessage();
+            assertNotNull(message, "The response must contain message for user!");
+
+            List<Link> selfRelationsLinks = responseBody.getLinks(SELF_RELATION_NAME);
+            List<Link> confirmationUrls = responseBody.getLinks(CONFIRMATION_URL_RELATION_NAME);
+
+            assertNotNull(selfRelationsLinks, "The response must contain the 'self' relation");
+            assertNotNull(confirmationUrls, "The response must contain the links relations!");
+
+            assertNotEquals(0, selfRelationsLinks.size(), "The 'self' relation must contain at least 1 element");
+            assertNotEquals(0, confirmationUrls.size(), "The relation must contain at least 1 element!");
+        }
+
+
+        @Test
+        @DisplayName("Register the user with invalid registration info and expect HTTP 400")
+        void registerUserWithInvalidInfo_andExceptHttp400() throws Exception {
+            // given
+            UserRegistrationInfo info = getValidUserRegistrationInfo();
+            info.setEmail("invalidemail");
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+            String requestBody = mapper.writeValueAsString(info);
+
+            // when
+            MvcResult mvcResult = mockMvc.perform(post(SIGNUP_ENDPOINT_NAME)
+                            .content(requestBody)
+                            .contentType(MediaType.APPLICATION_JSON)
+                    )
+                    .andDo(print())
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                    .andReturn();
+            // then
+            ApiErrorDetailsInfo errorInfo = JsonTestUtils.convertToPojo(mvcResult, ApiErrorDetailsInfo.class);
+            HttpStatus httpStatus = errorInfo.toHttpStatus();
+
+            assertEquals(HttpStatus.BAD_REQUEST,httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
+            assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
+            assertEquals(errorInfo.getErrorDetails(), ApiErrorDetailsInfo.ErrorDetails.INVALID_EMAIL, "If email is incorrect, then invalid_email error message must be returned");
+
+        }
+    }
+
+    private UserRegistrationInfo getValidUserRegistrationInfo() {
+        String email = "odeyalo@gmail.com";
+        String password = "mysupercoolpassword123";
+        LocalDate birthdate = LocalDate.of(2002, 11, 23);
+        String gender = "MALE";
+        boolean notificationEnabled = true;
+
+        return UserRegistrationInfo.builder()
+                .email(email)
+                .password(password)
+                .birthdate(birthdate)
+                .gender(gender)
+                .notificationEnabled(notificationEnabled)
+                .build();
+    }
+}

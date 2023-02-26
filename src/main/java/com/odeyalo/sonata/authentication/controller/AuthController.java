@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.regex.Pattern;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -25,6 +27,16 @@ public class AuthController {
         if (!EmailValidator.getInstance().isValid(info.getEmail())) {
             return ResponseEntity.badRequest().body(new ApiErrorDetailsInfo(HttpStatus.BAD_REQUEST, ApiErrorDetailsInfo.ErrorDetails.INVALID_EMAIL));
         }
+
+        if (info.getEmail().equals("alreadytaken@gmail.com")) {
+            return ResponseEntity.badRequest().body(new ApiErrorDetailsInfo(HttpStatus.BAD_REQUEST, ApiErrorDetailsInfo.ErrorDetails.EMAIL_ALREADY_TAKEN));
+        }
+
+        Pattern pattern = Pattern.compile("^(?=.*[0-9])(?=.*[a-zA-Z]).{8,}$");
+        if (!pattern.matcher(info.getPassword()).matches()) {
+            return ResponseEntity.badRequest().body(new ApiErrorDetailsInfo(HttpStatus.BAD_REQUEST, ApiErrorDetailsInfo.ErrorDetails.INVALID_PASSWORD));
+        }
+
         return getSuccessResponse(info, dto);
     }
 

@@ -33,8 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @AutoConfigureMockMvc
 class AuthControllerTest {
 
-    public static final String CONFIRMATION_URL_RELATION_NAME = "confirmation_url";
-    public static final String SELF_RELATION_NAME = "self";
     @Autowired
     private MockMvc mockMvc;
 
@@ -42,6 +40,11 @@ class AuthControllerTest {
 
     @Nested
     class RegistrationAuthControllerTests {
+        public static final String ALREADY_TAKEN_EMAIL = "alreadytaken@gmail.com";
+        public static final String CONFIRMATION_URL_RELATION_NAME = "confirmation_url";
+        public static final String SELF_RELATION_NAME = "self";
+        public static final String INVALID_PASSWORD = "invalid";
+
         /**
          * The test case tests the '/auth/signup endpoint', the test purpose is to register the user with valid JSON body
          * and expect valid response from controller.
@@ -51,9 +54,8 @@ class AuthControllerTest {
         void shouldRegisterUser_andExceptHttp200() throws Exception {
             // given
             UserRegistrationInfo registrationInfo = getValidUserRegistrationInfo();
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.registerModule(new JavaTimeModule());
-            String requestBody = mapper.writeValueAsString(registrationInfo);
+
+            String requestBody = JsonTestUtils.convertToJson(registrationInfo);
 
             // when
             MvcResult mvcResult = mockMvc.perform(post(SIGNUP_ENDPOINT_NAME)
@@ -83,14 +85,13 @@ class AuthControllerTest {
 
 
         @Test
-        @DisplayName("Register the user with invalid registration info and expect HTTP 400")
-        void registerUserWithInvalidInfo_andExceptHttp400() throws Exception {
+        @DisplayName("Register the user with invalid registration info that contains invalid email and expect HTTP 400 with INVALID_EMAIL error")
+        void registerUserWithInvalidEmail_andExceptHttp400WithInvalidEmailError() throws Exception {
             // given
             UserRegistrationInfo info = getValidUserRegistrationInfo();
             info.setEmail("invalidemail");
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.registerModule(new JavaTimeModule());
-            String requestBody = mapper.writeValueAsString(info);
+
+            String requestBody = JsonTestUtils.convertToJson(info);
 
             // when
             MvcResult mvcResult = mockMvc.perform(post(SIGNUP_ENDPOINT_NAME)
@@ -108,7 +109,60 @@ class AuthControllerTest {
             assertEquals(HttpStatus.BAD_REQUEST,httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
             assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
             assertEquals(errorInfo.getErrorDetails(), ApiErrorDetailsInfo.ErrorDetails.INVALID_EMAIL, "If email is incorrect, then invalid_email error message must be returned");
+        }
 
+        @Test
+        @DisplayName("Register the user with invalid registration info that contains already used email and expect HTTP 400 with EMAIL_ALREADY_TAKEN error")
+        void registerUserWithTakenEmail_andExceptHttp400WithEmailAlreadyTakenError() throws Exception {
+            // given
+            UserRegistrationInfo info = getValidUserRegistrationInfo();
+            info.setEmail(ALREADY_TAKEN_EMAIL);
+
+            String requestBody = JsonTestUtils.convertToJson(info);
+
+            // when
+            MvcResult mvcResult = mockMvc.perform(post(SIGNUP_ENDPOINT_NAME)
+                            .content(requestBody)
+                            .contentType(MediaType.APPLICATION_JSON)
+                    )
+                    .andDo(print())
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                    .andReturn();
+            // then
+            ApiErrorDetailsInfo errorInfo = JsonTestUtils.convertToPojo(mvcResult, ApiErrorDetailsInfo.class);
+            HttpStatus httpStatus = errorInfo.toHttpStatus();
+
+            assertEquals(HttpStatus.BAD_REQUEST,httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
+            assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
+            assertEquals(errorInfo.getErrorDetails(), ApiErrorDetailsInfo.ErrorDetails.EMAIL_ALREADY_TAKEN, "If email is already taken by other user, then email_already_taken error message must be returned");
+        }
+
+        @Test
+        @DisplayName("Register the user with invalid registration info that contains invalid email and expect HTTP 400 with INVALID_PASSWORD error")
+        void registerUserWithInvalidPassword_andExceptHttp400WithInvalidPasswordError() throws Exception {
+            // given
+            UserRegistrationInfo info = getValidUserRegistrationInfo();
+            info.setPassword(INVALID_PASSWORD);
+
+            String requestBody = JsonTestUtils.convertToJson(info);
+
+            // when
+            MvcResult mvcResult = mockMvc.perform(post(SIGNUP_ENDPOINT_NAME)
+                            .content(requestBody)
+                            .contentType(MediaType.APPLICATION_JSON)
+                    )
+                    .andDo(print())
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                    .andReturn();
+            // then
+            ApiErrorDetailsInfo errorInfo = JsonTestUtils.convertToPojo(mvcResult, ApiErrorDetailsInfo.class);
+            HttpStatus httpStatus = errorInfo.toHttpStatus();
+
+            assertEquals(HttpStatus.BAD_REQUEST,httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
+            assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
+            assertEquals(errorInfo.getErrorDetails(), ApiErrorDetailsInfo.ErrorDetails.INVALID_PASSWORD, "If the password is incorrect, then invalid_password error must be returned");
         }
     }
 

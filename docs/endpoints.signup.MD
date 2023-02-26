@@ -2,7 +2,7 @@
 
 ``
 HTTP 1.1 curl -X POST -H  'application/json' /api/v1/auth/signup
-`` used to authenticate the user. 
+`` used to register the user. 
 
 The json must contain the following fields:
 
@@ -18,7 +18,7 @@ The json must contain the following fields:
 The example of valid JSON body:
 ```json
 {
-  "username": "odeyalo@gmail.com",
+  "email": "odeyalo@gmail.com",
   "password": "mysupercoolpassword123",
   "birthdate": "2002-11-23",
   "gender": "MALE",
@@ -31,8 +31,16 @@ Possible responses:
 ```json
 {
   "message": "To confirm your email we sent message to your email. Check it out",
-  "confirmation_url": "/api/v1/auth/email/verify"
+  "_links": {
+    "self": {
+      "href": "https://sonataproject.com/api/v1/auth/signup"
+    },
+    "confirmation_url": {
+      "href": "https://sonataproject.com/api/v1/auth/email/verify"
+    }
+  }
 }
+
 ```
 * confirmation_url - url to send the confirmation code to exchange the confirmation code to access token.
 

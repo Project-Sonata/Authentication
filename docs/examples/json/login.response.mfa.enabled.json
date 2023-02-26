@@ -1,0 +1,13 @@
+{
+  "status": 200,
+  "mfa_enabled": true,
+  "message": "The MFA is enabled. Check your device or email",
+  "_links": {
+    "self": {
+      "href": "https://sonataproject.com/api/v1/auth/signup"
+    },
+    "mfa_checker_url": {
+      "href": "https://sonataproject.com/api/v1/auth/mfa/check"
+    }
+  }
+}

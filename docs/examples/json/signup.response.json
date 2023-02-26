@@ -1,0 +1,11 @@
+{
+  "message": "To confirm your email we sent message to your email. Check it out",
+  "_links": {
+    "self": {
+      "href": "https://sonataproject.com/api/v1/auth/signup"
+    },
+    "confirmation_url": {
+      "href": "https://sonataproject.com/api/v1/auth/email/verify"
+    }
+  }
+}

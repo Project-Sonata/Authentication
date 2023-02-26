@@ -23,6 +23,10 @@ public class JsonTestUtils {
         mapper.registerModule(new Jackson2HalModule());
     }
 
+    public static <T> String convertToJson(Object target) throws JsonProcessingException {
+        return mapper.writeValueAsString(target);
+    }
+
     public static <T> T convertToPojo(MvcResult mvcResult, Class<T> requiredClass) throws UnsupportedEncodingException, JsonProcessingException {
         return mapper.readValue(mvcResult.getResponse().getContentAsString(), requiredClass);
     }

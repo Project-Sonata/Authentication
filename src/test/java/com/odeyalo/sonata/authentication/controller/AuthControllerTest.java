@@ -1,8 +1,7 @@
 package com.odeyalo.sonata.authentication.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.odeyalo.sonata.authentication.JsonTestUtils;
+import com.odeyalo.sonata.authentication.common.ErrorDetails;
 import com.odeyalo.sonata.authentication.dto.error.ApiErrorDetailsInfo;
 import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
 import com.odeyalo.sonata.authentication.dto.response.UserRegistrationConfirmationResponseDto;
@@ -108,7 +107,7 @@ class AuthControllerTest {
 
             assertEquals(HttpStatus.BAD_REQUEST,httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
             assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
-            assertEquals(errorInfo.getErrorDetails(), ApiErrorDetailsInfo.ErrorDetails.INVALID_EMAIL, "If email is incorrect, then invalid_email error message must be returned");
+            assertEquals(errorInfo.getErrorDetails(), ErrorDetails.INVALID_EMAIL, "If email is incorrect, then invalid_email error message must be returned");
         }
 
         @Test
@@ -135,7 +134,7 @@ class AuthControllerTest {
 
             assertEquals(HttpStatus.BAD_REQUEST,httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
             assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
-            assertEquals(errorInfo.getErrorDetails(), ApiErrorDetailsInfo.ErrorDetails.EMAIL_ALREADY_TAKEN, "If email is already taken by other user, then email_already_taken error message must be returned");
+            assertEquals(errorInfo.getErrorDetails(), ErrorDetails.EMAIL_ALREADY_TAKEN, "If email is already taken by other user, then email_already_taken error message must be returned");
         }
 
         @Test
@@ -162,7 +161,7 @@ class AuthControllerTest {
 
             assertEquals(HttpStatus.BAD_REQUEST,httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
             assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
-            assertEquals(errorInfo.getErrorDetails(), ApiErrorDetailsInfo.ErrorDetails.INVALID_PASSWORD, "If the password is incorrect, then invalid_password error must be returned");
+            assertEquals(errorInfo.getErrorDetails(), ErrorDetails.INVALID_PASSWORD, "If the password is incorrect, then invalid_password error must be returned");
         }
     }
 

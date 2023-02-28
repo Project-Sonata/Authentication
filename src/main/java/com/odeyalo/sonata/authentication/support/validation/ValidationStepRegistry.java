@@ -9,33 +9,33 @@ import java.util.List;
  *
  * @param <T> - type of the ValidationStep to registry
  */
-public interface ValidationStepRegistry<T> {
+public interface ValidationStepRegistry<T extends ValidationStep<?>> {
 
     /**
      * Return all registered {@link ValidationStep}
      * Note: The implementation should return NEW List with steps to make it immutable.
      * @return - all registered steps in new list
      */
-    List<ValidationStep<T>> getSteps();
+    List<T> getSteps();
 
     /**
      * Add the given step to registry
      * @param step - step to add into the registry
      */
-    void add(ValidationStep<T> step);
+    void add(T step);
 
     /**
      * Add the given step to registry at specific index
      * @param index - index to insert the step
      * @param step - step to add
      */
-    void add(int index, ValidationStep<T> step);
+    void add(int index, T step);
 
     /**
      * Remove the ValidationStep from the registry
      * @param step - step to remove
      */
-    void remove(ValidationStep<T> step);
+    void remove(T step);
 
     /**
      * Return the size of the registry

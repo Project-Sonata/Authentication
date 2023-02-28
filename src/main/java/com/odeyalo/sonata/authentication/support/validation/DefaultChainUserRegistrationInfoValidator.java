@@ -21,17 +21,11 @@ public class DefaultChainUserRegistrationInfoValidator implements UserRegistrati
 
     @Override
     public ValidationResult validateInfo(UserRegistrationInfo info) {
-        if (!EmailValidator.getInstance().isValid(info.getEmail())) {
-            return ValidationResult.failed( ErrorDetails.INVALID_EMAIL);
-        }
-
-        if (info.getEmail().equals("alreadytaken@gmail.com")) {
-            return ValidationResult.failed( ErrorDetails.EMAIL_ALREADY_TAKEN);
-        }
-
-        Pattern pattern = Pattern.compile("^(?=.*[0-9])(?=.*[a-zA-Z]).{8,}$");
-        if (!pattern.matcher(info.getPassword()).matches()) {
-            return ValidationResult.failed( ErrorDetails.INVALID_PASSWORD);
+        for (UserRegistrationInfoValidationStep validationStep : container.getSteps()) {
+            ValidationResult result = validationStep.validate(info);
+            if (!result.isSuccess()) {
+                return ValidationResult.failed(result.getErrorDetails());
+            }
         }
         return ValidationResult.success();
     }

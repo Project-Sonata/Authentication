@@ -2,8 +2,10 @@ package com.odeyalo.sonata.authentication.testing.factory;
 
 import com.odeyalo.sonata.authentication.support.validation.UserRegistrationInfoValidationStepContainer;
 import com.odeyalo.sonata.authentication.support.validation.UserRegistrationInfoValidationStepRegistry;
+import com.odeyalo.sonata.authentication.support.validation.step.EmailAlreadyTakenCheckUserRegistrationInfoValidationStep;
+import com.odeyalo.sonata.authentication.support.validation.step.EmailRegexUserRegistrationInfoValidationStep;
+import com.odeyalo.sonata.authentication.support.validation.step.PasswordRegexCheckUserRegistrationInfoValidationStep;
 import com.odeyalo.sonata.authentication.support.validation.step.UserRegistrationInfoValidationStep;
-import com.odeyalo.sonata.authentication.testing.stubs.InvalidEmailDenyingUserRegistrationInfoValidationStepStub;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,9 @@ public class UserRegistrationInfoValidationStepRegistryTestingFactory {
 
         List<UserRegistrationInfoValidationStep> validators = new ArrayList<>();
 
-        validators.add(new InvalidEmailDenyingUserRegistrationInfoValidationStepStub());
+        validators.add(new EmailRegexUserRegistrationInfoValidationStep());
+        validators.add(new EmailAlreadyTakenCheckUserRegistrationInfoValidationStep());
+        validators.add(new PasswordRegexCheckUserRegistrationInfoValidationStep());
 
         return new UserRegistrationInfoValidationStepContainer(validators);
     }

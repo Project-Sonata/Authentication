@@ -16,4 +16,4 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
       - name: Tests
-        uses: docker-compose -f docker-compose.test.yml up --abort-on-container-exit
+        run: docker-compose -f docker-compose.test.yml up --abort-on-container-exit

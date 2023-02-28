@@ -1,6 +1,9 @@
 package com.odeyalo.sonata.authentication.support.validation;
 
 import com.odeyalo.sonata.authentication.support.validation.step.UserRegistrationInfoValidationStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -13,13 +16,17 @@ import java.util.List;
 @Component
 public class UserRegistrationInfoValidationStepContainer implements UserRegistrationInfoValidationStepRegistry {
     private final List<UserRegistrationInfoValidationStep> validators;
+    private final Logger logger = LoggerFactory.getLogger(UserRegistrationInfoValidationStepContainer.class);
 
     public UserRegistrationInfoValidationStepContainer() {
         this(new ArrayList<>());
+        this.logger.info("Initialized validators with empty list");
     }
 
+    @Autowired
     public UserRegistrationInfoValidationStepContainer(List<UserRegistrationInfoValidationStep> validators) {
         this.validators = validators;
+        this.logger.info("Initialized validators with: {}", validators);
     }
 
     @Override

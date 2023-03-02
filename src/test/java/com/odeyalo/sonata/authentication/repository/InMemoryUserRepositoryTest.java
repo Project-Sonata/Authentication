@@ -128,14 +128,19 @@ class InMemoryUserRepositoryTest {
     @Test
     @DisplayName("Save the user inside the repository and expect user to be saved")
     void saveUser_andExpectUserToBeSaved() {
+        // Given
         User userToSave = new User(1L, "odeyalo@gmail.com", true);
         InMemoryUserRepository repository = UserRepositoryTestingFactory.inMemoryCreate();
-
+        // When
         User user = repository.save(userToSave);
-
+        // Then
         assertNotNull(user, "save() method should return non-null user!");
         assertNotNull(user.getId(), "save() method method should set user's id if ID was not presented!");
         assertEquals(user, userToSave, "save() method must return same user!");
+
+        User byId = repository.findById(user.getId());
+
+        assertEquals(user, byId, "If save() method was called, then user must be saved!");
     }
 
     @Test
@@ -148,6 +153,10 @@ class InMemoryUserRepositoryTest {
 
         assertNotNull(user, "save() method should return non-null user!");
         assertNotNull(user.getId(), "save() method method should set user's id if ID was not presented!");
+
+        User byId = repository.findById(user.getId());
+
+        assertEquals(user, byId, "If save() method was called, then user must be saved!");
     }
 
     @Test

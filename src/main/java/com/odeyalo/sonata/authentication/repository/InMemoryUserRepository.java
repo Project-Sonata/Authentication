@@ -52,6 +52,7 @@ public class InMemoryUserRepository implements UserRepository {
     public <T extends User> T save(User user) {
         Long id = resolveId(user);
         user.setId(id);
+        this.users.put(id, user);
         return (T) user;
     }
 

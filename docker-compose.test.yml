@@ -7,3 +7,21 @@ services:
       context: .
       dockerfile: Dockerfile.test
     container_name: auth-microservice-image
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - test-env-variables.env
+  db:
+    image: 'postgres:13.1-alpine'
+    container_name: db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5

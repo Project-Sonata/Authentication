@@ -44,8 +44,8 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public User findById(Long id) {
-        return users.get(id);
+    public Optional<User> findById(Long id) {
+        return Optional.ofNullable(users.get(id));
     }
 
     @Override

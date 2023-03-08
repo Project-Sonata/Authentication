@@ -24,7 +24,7 @@ public class DefaultChainUserRegistrationInfoValidator implements UserRegistrati
         for (UserRegistrationInfoValidationStep validationStep : container.getSteps()) {
             ValidationResult result = validationStep.validate(info);
             if (!result.isSuccess()) {
-                return ValidationResult.failed(result.getErrorDetails());
+                return result;
             }
         }
         return ValidationResult.success();

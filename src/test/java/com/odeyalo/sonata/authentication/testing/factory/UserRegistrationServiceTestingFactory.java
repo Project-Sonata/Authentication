@@ -3,7 +3,7 @@ package com.odeyalo.sonata.authentication.testing.factory;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.repository.InMemoryUserRepository;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
-import com.odeyalo.sonata.authentication.service.registration.DefaultUserRegistrationService;
+import com.odeyalo.sonata.authentication.service.registration.EmailConfirmationUserRegistrationService;
 import com.odeyalo.sonata.authentication.service.registration.UserRegistrationService;
 
 import java.util.function.Consumer;
@@ -41,8 +41,8 @@ public class UserRegistrationServiceTestingFactory {
             return this;
         }
 
-        public DefaultUserRegistrationService build() {
-            return new DefaultUserRegistrationService(userRepository);
+        public EmailConfirmationUserRegistrationService build() {
+            return new EmailConfirmationUserRegistrationService(userRepository);
         }
     }
 }

@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DefaultUserRegistrationServiceTest {
+class EmailConfirmationUserRegistrationServiceTest {
 
     @Test
     @DisplayName("Register the user with valid info and expect success as result")
@@ -20,7 +20,7 @@ class DefaultUserRegistrationServiceTest {
         InMemoryUserRepository spy = new InMemoryUserRepository();
         String email = "odeyalo@gmail.com";
 
-        DefaultUserRegistrationService userRegistrationService = UserRegistrationServiceTestingFactory
+        EmailConfirmationUserRegistrationService userRegistrationService = UserRegistrationServiceTestingFactory
                 .createDefaultService()
                 .overrideUserRepository(spy)
                 .build();

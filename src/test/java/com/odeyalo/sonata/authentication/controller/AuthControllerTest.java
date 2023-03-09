@@ -5,6 +5,8 @@ import com.odeyalo.sonata.authentication.common.ErrorDetails;
 import com.odeyalo.sonata.authentication.dto.error.ApiErrorDetailsInfo;
 import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
 import com.odeyalo.sonata.authentication.dto.response.UserRegistrationConfirmationResponseDto;
+import com.odeyalo.sonata.authentication.entity.User;
+import com.odeyalo.sonata.authentication.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,9 @@ class AuthControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public static final String SIGNUP_ENDPOINT_NAME = "/auth/signup";
 
@@ -82,6 +87,14 @@ class AuthControllerTest {
 
             assertNotEquals(0, selfRelationsLinks.size(), "The 'self' relation must contain at least 1 element");
             assertNotEquals(0, confirmationUrls.size(), "The relation must contain at least 1 element!");
+
+            String email = registrationInfo.getEmail();
+            User user = userRepository.findUserByEmail(email);
+
+            assertNotNull(user, "User must be saved to DB after registration");
+            assertEquals(email, user.getEmail(), "Emails must be equal!");
+            assertNotNull(user.getPassword(), "Password must be encoded and saved!");
+            assertNotEquals(registrationInfo.getPassword(), user.getPassword(), "Password must be encoded and MUST NOT be saved in plain text");
         }
 
 
@@ -92,6 +105,8 @@ class AuthControllerTest {
             UserRegistrationInfo info = getValidUserRegistrationInfo();
             info.setEmail("invalidemail");
 
+            long beforeRequestCount = userRepository.count();
+
             String requestBody = JsonTestUtils.convertToJson(info);
 
             // when
@@ -104,12 +119,14 @@ class AuthControllerTest {
                     .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_VALUE))
                     .andReturn();
             // then
+            long afterRequestCount = userRepository.count();
             ApiErrorDetailsInfo errorInfo = JsonTestUtils.convertToPojo(mvcResult, ApiErrorDetailsInfo.class);
             HttpStatus httpStatus = errorInfo.toHttpStatus();
-
+            assertEquals(beforeRequestCount, afterRequestCount, "Count must be same if user was not saved");
             assertEquals(HttpStatus.BAD_REQUEST,httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
             assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
             assertEquals(errorInfo.getErrorDetails(), ErrorDetails.INVALID_EMAIL, "If email is incorrect, then invalid_email error message must be returned");
+
         }
 
         @Test
@@ -118,6 +135,7 @@ class AuthControllerTest {
             // given
             UserRegistrationInfo info = getValidUserRegistrationInfo();
             info.setEmail(ALREADY_TAKEN_EMAIL);
+            long beforeRequestCount = userRepository.count();
 
             String requestBody = JsonTestUtils.convertToJson(info);
 
@@ -130,10 +148,13 @@ class AuthControllerTest {
                     .andExpect(MockMvcResultMatchers.status().isBadRequest())
                     .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_VALUE))
                     .andReturn();
+
             // then
+            long afterRequestCount = userRepository.count();
             ApiErrorDetailsInfo errorInfo = JsonTestUtils.convertToPojo(mvcResult, ApiErrorDetailsInfo.class);
             HttpStatus httpStatus = errorInfo.toHttpStatus();
 
+            assertEquals(beforeRequestCount, afterRequestCount, "Count must be same if user was not saved");
             assertEquals(HttpStatus.BAD_REQUEST,httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
             assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
             assertEquals(errorInfo.getErrorDetails(), ErrorDetails.EMAIL_ALREADY_TAKEN, "If email is already taken by other user, then email_already_taken error message must be returned");
@@ -146,6 +167,8 @@ class AuthControllerTest {
             UserRegistrationInfo info = getValidUserRegistrationInfo();
             info.setPassword(INVALID_PASSWORD);
 
+            long beforeRequestCount = userRepository.count();
+
             String requestBody = JsonTestUtils.convertToJson(info);
 
             // when
@@ -157,10 +180,13 @@ class AuthControllerTest {
                     .andExpect(MockMvcResultMatchers.status().isBadRequest())
                     .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_VALUE))
                     .andReturn();
+
             // then
+            long afterRequestCount = userRepository.count();
             ApiErrorDetailsInfo errorInfo = JsonTestUtils.convertToPojo(mvcResult, ApiErrorDetailsInfo.class);
             HttpStatus httpStatus = errorInfo.toHttpStatus();
 
+            assertEquals(beforeRequestCount, afterRequestCount, "Count must be same if user was not saved");
             assertEquals(HttpStatus.BAD_REQUEST,httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
             assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
             assertEquals(errorInfo.getErrorDetails(), ErrorDetails.INVALID_PASSWORD, "If the password is incorrect, then invalid_password error must be returned");

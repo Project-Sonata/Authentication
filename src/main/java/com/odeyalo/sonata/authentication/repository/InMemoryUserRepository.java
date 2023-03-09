@@ -1,6 +1,8 @@
 package com.odeyalo.sonata.authentication.repository;
 
 import com.odeyalo.sonata.authentication.entity.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 public class InMemoryUserRepository implements UserRepository {
     private final Map<Long, User> users;
     private final AtomicLong idHolder = new AtomicLong();
+    private final Logger logger = LoggerFactory.getLogger(InMemoryUserRepository.class);
 
     public InMemoryUserRepository() {
         this.users = new ConcurrentHashMap<>();
@@ -37,6 +40,7 @@ public class InMemoryUserRepository implements UserRepository {
         for (Map.Entry<Long, User> entry : users.entrySet()) {
             User user = entry.getValue();
             if (user.getEmail().equals(email)) {
+                this.logger.debug("Found user by email: {}", user);
                 return user;
             }
         }
@@ -53,12 +57,14 @@ public class InMemoryUserRepository implements UserRepository {
         Long id = resolveId(user);
         user.setId(id);
         this.users.put(id, user);
+        this.logger.debug("Saved user: {} with id: {}", user, id);
         return (T) user;
     }
 
     @Override
     public void deleteById(Long id) {
         users.remove(id);
+        this.logger.debug("Removed user by id: {}", id);
     }
 
     @Override

@@ -3,8 +3,8 @@ package com.odeyalo.sonata.authentication.controller;
 import com.odeyalo.sonata.authentication.dto.error.ApiErrorDetailsInfo;
 import com.odeyalo.sonata.authentication.dto.response.UserRegistrationConfirmationResponseDto;
 import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
-import com.odeyalo.sonata.authentication.service.registration.UserRegistrationService;
-import com.odeyalo.sonata.authentication.support.validation.UserRegistrationInfoValidator;
+import com.odeyalo.sonata.authentication.service.registration.RegistrationResult;
+import com.odeyalo.sonata.authentication.service.registration.UserRegistrationManager;
 import com.odeyalo.sonata.authentication.support.validation.ValidationResult;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
@@ -20,18 +20,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    private final UserRegistrationInfoValidator userRegistrationInfoValidator;
-    private UserRegistrationService registrationService;
-    public AuthController(UserRegistrationInfoValidator userRegistrationInfoValidator) {
-        this.userRegistrationInfoValidator = userRegistrationInfoValidator;
+    private final UserRegistrationManager userRegistrationManager;
+
+    public AuthController(UserRegistrationManager userRegistrationManager) {
+        this.userRegistrationManager = userRegistrationManager;
     }
-    // Controller -> UserRegistrationManager -> UserRegistrationService -> UserRepository
+
     @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> registerUser(@RequestBody UserRegistrationInfo info) {
         UserRegistrationConfirmationResponseDto dto = new UserRegistrationConfirmationResponseDto("We sent confirmation letter to your email. Check it out");
-        ValidationResult result = userRegistrationInfoValidator.validateInfo(info);
-        if (!result.isSuccess()) {
-            return ResponseEntity.badRequest().body(new ApiErrorDetailsInfo(HttpStatus.BAD_REQUEST, result.getErrorDetails()));
+        RegistrationResult result = userRegistrationManager.registerUser(info);
+
+        if (!result.success()) {
+            return ResponseEntity.badRequest().body(new ApiErrorDetailsInfo(HttpStatus.BAD_REQUEST, result.errorDetails()));
         }
         return getSuccessResponse(info, dto);
     }

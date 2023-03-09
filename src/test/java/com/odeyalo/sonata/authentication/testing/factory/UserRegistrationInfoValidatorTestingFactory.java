@@ -4,6 +4,9 @@ import com.odeyalo.sonata.authentication.support.validation.DefaultChainUserRegi
 import com.odeyalo.sonata.authentication.support.validation.UserRegistrationInfoValidationStepContainer;
 import com.odeyalo.sonata.authentication.support.validation.UserRegistrationInfoValidationStepRegistry;
 import com.odeyalo.sonata.authentication.support.validation.UserRegistrationInfoValidator;
+import com.odeyalo.sonata.authentication.support.validation.step.EmailAlreadyTakenCheckUserRegistrationInfoValidationStep;
+import com.odeyalo.sonata.authentication.support.validation.step.EmailRegexUserRegistrationInfoValidationStep;
+import com.odeyalo.sonata.authentication.support.validation.step.PasswordRegexCheckUserRegistrationInfoValidationStep;
 import com.odeyalo.sonata.authentication.support.validation.step.UserRegistrationInfoValidationStep;
 import com.odeyalo.sonata.authentication.testing.stubs.InvalidEmailDenyingUserRegistrationInfoValidationStepStub;
 
@@ -24,10 +27,20 @@ public class UserRegistrationInfoValidatorTestingFactory {
      *
      * @return - DefaultChainUserRegistrationInfoValidator with registered ValidationSteps
      */
-    public static UserRegistrationInfoValidator create() {
+    public static UserRegistrationInfoValidator createDeniedValidator() {
         List<UserRegistrationInfoValidationStep> validators = new ArrayList<>();
 
         validators.add(new InvalidEmailDenyingUserRegistrationInfoValidationStepStub());
+
+        return new DefaultChainUserRegistrationInfoValidator(new UserRegistrationInfoValidationStepContainer(validators));
+    }
+
+    public static UserRegistrationInfoValidator createRealValidator() {
+        List<UserRegistrationInfoValidationStep> validators = new ArrayList<>();
+
+        validators.add(new EmailRegexUserRegistrationInfoValidationStep());
+        validators.add(new EmailAlreadyTakenCheckUserRegistrationInfoValidationStep());
+        validators.add(new PasswordRegexCheckUserRegistrationInfoValidationStep());
 
         return new DefaultChainUserRegistrationInfoValidator(new UserRegistrationInfoValidationStepContainer(validators));
     }

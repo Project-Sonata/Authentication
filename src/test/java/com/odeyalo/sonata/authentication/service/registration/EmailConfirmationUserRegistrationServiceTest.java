@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DefaultUserRegistrationServiceTest {
+class EmailConfirmationUserRegistrationServiceTest {
 
     @Test
     @DisplayName("Register the user with valid info and expect success as result")
@@ -19,13 +19,14 @@ class DefaultUserRegistrationServiceTest {
         // Given
         InMemoryUserRepository spy = new InMemoryUserRepository();
         String email = "odeyalo@gmail.com";
+        String password = "password123";
 
-        DefaultUserRegistrationService userRegistrationService = UserRegistrationServiceTestingFactory
+        EmailConfirmationUserRegistrationService userRegistrationService = UserRegistrationServiceTestingFactory
                 .createDefaultService()
                 .overrideUserRepository(spy)
                 .build();
 
-        UserRegistrationInfo info = new UserRegistrationInfo(email, "password",
+        UserRegistrationInfo info = new UserRegistrationInfo(email, password,
                 "MALE", LocalDate.of(2000, 12, 12), false);
         // When
         RegistrationResult result = userRegistrationService.registerUser(info);
@@ -34,7 +35,12 @@ class DefaultUserRegistrationServiceTest {
         assertEquals(RegistrationResult.RequiredAction.CONFIRM_EMAIL, result.action(),
                 "If the user enter email and use default registration form, then RequiredAction.CONFIRM_EMAIL should be returned");
         User actualUser = spy.findUserByEmail(email);
+
         assertNotNull(actualUser, "If the user has been registered, then user should be added to DB or other type of storage");
         assertFalse(actualUser.isActive(), "If required action is CONFIRM_EMAIL, then user should be activated only after email confirmation");
+        assertNotNull(actualUser.getEmail(), "Email must be saved!");
+        assertEquals(email, actualUser.getEmail(), "Email must be saved!");
+        assertNotNull(actualUser.getPassword(), "Password must be encoded and saved!");
+        assertNotEquals(password, actualUser.getPassword(), "Password must be encoded and saved!");
     }
 }

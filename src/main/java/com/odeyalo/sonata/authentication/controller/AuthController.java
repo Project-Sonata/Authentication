@@ -1,11 +1,11 @@
 package com.odeyalo.sonata.authentication.controller;
 
 import com.odeyalo.sonata.authentication.dto.error.ApiErrorDetailsInfo;
-import com.odeyalo.sonata.authentication.dto.response.UserRegistrationConfirmationResponseDto;
 import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.dto.response.TokensResponse;
+import com.odeyalo.sonata.authentication.dto.response.UserRegistrationConfirmationResponseDto;
 import com.odeyalo.sonata.authentication.service.registration.RegistrationResult;
 import com.odeyalo.sonata.authentication.service.registration.UserRegistrationManager;
-import com.odeyalo.sonata.authentication.support.validation.ValidationResult;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
@@ -35,6 +35,14 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new ApiErrorDetailsInfo(HttpStatus.BAD_REQUEST, result.errorDetails()));
         }
         return getSuccessResponse(info, dto);
+    }
+
+    @PostMapping(value = "/confirm/email", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> confirmEmail() {
+        TokensResponse.Token accessToken = new TokensResponse.Token("access_token_value", 3600);
+        TokensResponse.Token refreshTokenToken = new TokensResponse.Token("refresh_token_value", 10000);
+        TokensResponse body = new TokensResponse(HttpStatus.OK, new TokensResponse.Tokens(accessToken, refreshTokenToken));
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(body);
     }
 
     private ResponseEntity<UserRegistrationConfirmationResponseDto> getSuccessResponse(UserRegistrationInfo info, UserRegistrationConfirmationResponseDto dto) {

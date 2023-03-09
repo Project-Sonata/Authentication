@@ -3,7 +3,9 @@ package com.odeyalo.sonata.authentication.controller;
 import com.odeyalo.sonata.authentication.JsonTestUtils;
 import com.odeyalo.sonata.authentication.common.ErrorDetails;
 import com.odeyalo.sonata.authentication.dto.error.ApiErrorDetailsInfo;
+import com.odeyalo.sonata.authentication.dto.request.ConfirmationCodeData;
 import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.dto.response.TokensResponse;
 import com.odeyalo.sonata.authentication.dto.response.UserRegistrationConfirmationResponseDto;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
@@ -43,6 +45,7 @@ class AuthControllerTest {
     private UserRepository userRepository;
 
     public static final String SIGNUP_ENDPOINT_NAME = "/auth/signup";
+    public static final String EMAIL_CONFIRMATION_ENDPOINT_NAME = "/auth/confirm/email";
 
     @Nested
     class RegistrationAuthControllerTests {
@@ -190,6 +193,45 @@ class AuthControllerTest {
             assertEquals(HttpStatus.BAD_REQUEST,httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
             assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
             assertEquals(errorInfo.getErrorDetails(), ErrorDetails.INVALID_PASSWORD, "If the password is incorrect, then invalid_password error must be returned");
+        }
+    }
+
+    @Nested
+    class EmailConfirmationEndpointsAuthControllerTests {
+
+        @Test
+        @DisplayName("Send valid email confirmation code and expect HTTP 200 OK with JSON body that contains access and refresh tokens")
+        void sendValidCode_andExpectOKWithTokens() throws Exception {
+            ConfirmationCodeData data = new ConfirmationCodeData("123456");
+            String json = JsonTestUtils.convertToJson(data);
+
+            MvcResult mvcResult = mockMvc.perform(
+                            post(EMAIL_CONFIRMATION_ENDPOINT_NAME)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(json))
+                    .andDo(print())
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                    .andReturn();
+
+            TokensResponse tokensResponse = JsonTestUtils.convertToPojo(mvcResult, TokensResponse.class);
+
+            TokensResponse.Tokens tokens = tokensResponse.getTokens();
+
+            assertNotNull(tokens, "Response MUST NOT BE NULL and contain access and refresh tokens");
+
+            TokensResponse.Token accessToken = tokens.getAccessToken();
+            TokensResponse.Token refreshToken = tokens.getRefreshToken();
+
+            assertNotNull(accessToken, "Access token must be presented in response!");
+            assertNotNull(refreshToken, "Refresh token must be presented in response!");
+
+            assertNotNull(accessToken.getBody(), "Body of the access token must be not null and must contain token!");
+            assertNotNull(accessToken.getBody(), "Body of the refresh token must be not null and must contain token!");
+
+            assertTrue(accessToken.getExpiresIn() > 0, "Access token expire time must be greater than 0!");
+            assertTrue(refreshToken.getExpiresIn() > 0, "Refresh token expire time must be greater than 0!");
+            assertTrue(refreshToken.getExpiresIn() > accessToken.getExpiresIn(), "The expire time of the refresh token must be greater than the expire time of the access token");
         }
     }
 

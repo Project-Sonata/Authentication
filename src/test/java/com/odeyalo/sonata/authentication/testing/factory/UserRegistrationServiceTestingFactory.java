@@ -3,8 +3,13 @@ package com.odeyalo.sonata.authentication.testing.factory;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.repository.InMemoryUserRepository;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
+import com.odeyalo.sonata.authentication.service.confirmation.EmailConfirmationCodeGeneratorSender;
 import com.odeyalo.sonata.authentication.service.registration.EmailConfirmationUserRegistrationService;
 import com.odeyalo.sonata.authentication.service.registration.UserRegistrationService;
+import com.odeyalo.sonata.authentication.testing.spy.EmptyEmailConfirmationCodeGeneratorSenderSpy;
+import lombok.Getter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.function.Consumer;
 
@@ -26,8 +31,11 @@ public class UserRegistrationServiceTestingFactory {
         return parent;
     }
 
+    @Getter
     public static class DefaultUserRegistrationServiceBuilder {
         private UserRepository userRepository = new InMemoryUserRepository();
+        private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        private EmailConfirmationCodeGeneratorSender sender = new EmptyEmailConfirmationCodeGeneratorSenderSpy();
 
         public DefaultUserRegistrationServiceBuilder overrideUserRepository(UserRepository userRepository) {
             this.userRepository = userRepository;
@@ -41,8 +49,18 @@ public class UserRegistrationServiceTestingFactory {
             return this;
         }
 
+        public DefaultUserRegistrationServiceBuilder overridePasswordEncoder(PasswordEncoder passwordEncoder) {
+            this.passwordEncoder = passwordEncoder;
+            return this;
+        }
+
+        public DefaultUserRegistrationServiceBuilder overrideEmailConfirmationCodeGeneratorSender(EmailConfirmationCodeGeneratorSender sender) {
+            this.sender = sender;
+            return this;
+        }
+
         public EmailConfirmationUserRegistrationService build() {
-            return new EmailConfirmationUserRegistrationService(userRepository);
+            return new EmailConfirmationUserRegistrationService(userRepository, sender, passwordEncoder);
         }
     }
 }

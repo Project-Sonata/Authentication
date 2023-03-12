@@ -16,5 +16,4 @@ public interface ConfirmationCodeGenerator {
     default ConfirmationCode generateCode() {
         return generateCode(DEFAULT_CONFIRMATION_CODE_LENGTH, DEFAULT_CONFIRMATION_CODE_LIFETIME_MINUTES);
     }
-
 }

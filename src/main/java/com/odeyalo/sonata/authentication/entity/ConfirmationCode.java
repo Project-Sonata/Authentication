@@ -30,4 +30,31 @@ public class ConfirmationCode {
 
     @Column(name = "is_activated", nullable = false)
     private boolean activated = false;
+
+    @Column(name = "lifecycle_stage", nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private LifecycleStage lifecycleStage;
+
+    public enum LifecycleStage {
+        /**
+         * First stage of the lifecycle when the token has been only created
+         */
+        CREATED,
+        /**
+         * Lifecycle stage when the confirmation code is attempted to activate.
+         * This is useful when confirmation code is associated with a user's session and the generated code can only be activated from the same session
+         */
+        ATTEMPTED,
+        /**
+         * If ConfirmationCode has been successfully activated. In this case, code will not be longer valid(Can be removed from storage)
+         */
+        ACTIVATED,
+        /**
+         * Opposite to ACTIVATED stage,  there was an attempt to activate the confirmation code but code is no longer valid.
+         * For example, code that associated with specific session can only be attempted 3 times,
+         * if user enter code incorrect 3 times,
+         * then this code will be marked as DENIED and new code must be generated
+         */
+        DENIED
+    }
 }

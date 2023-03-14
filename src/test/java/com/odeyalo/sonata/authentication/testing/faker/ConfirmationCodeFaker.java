@@ -60,7 +60,16 @@ public class ConfirmationCodeFaker {
 
     public static ConfirmationCodeFaker withBodyNonActivated(String body) {
         return new ConfirmationCodeFaker(RandomUtils.nextLong(), body, false, ConfirmationCode.LifecycleStage.CREATED);
+    }
 
+    public ConfirmationCodeFaker nullId() {
+        this.id = null;
+        return this;
+    }
+
+    public  ConfirmationCodeFaker overrideId(Long id) {
+        this.id = id;
+        return this;
     }
 
     public ConfirmationCodeFaker randomId() {

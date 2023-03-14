@@ -8,6 +8,12 @@ import java.util.Optional;
  * Basic repository to working with {@link ConfirmationCode}
  */
 public interface ConfirmationCodeRepository {
+    /**
+     * Find a {@link ConfirmationCode} by id
+     * @param id - confirmation code's id
+     * @return - ConfirmationCode wrapped in Optional, {@link Optional#empty()} otherwise
+     */
+    Optional<ConfirmationCode> findById(Long id);
 
     /**
      * Find the confirmation code by code value

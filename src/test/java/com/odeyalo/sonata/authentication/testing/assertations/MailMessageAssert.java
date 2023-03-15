@@ -4,6 +4,7 @@ import com.odeyalo.sonata.authentication.service.confirmation.EmailReceiver;
 import com.odeyalo.sonata.authentication.service.sender.MailMessage;
 import org.apache.commons.lang3.BooleanUtils;
 import org.assertj.core.api.AbstractAssert;
+import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,84 +22,154 @@ public class MailMessageAssert extends AbstractAssert<MailMessageAssert, MailMes
     }
 
     public static MailMessageAssert forMessage(MailMessage message) {
+        Assert.notNull(message, "Message must be not null!");
         return new MailMessageAssert(message);
     }
 
     public MailMessageAssert empty() {
-        contentNull()
-                .receiverNull()
-                .subjectNull();
+        content()
+                .nullable()
+                    .and()
+                .receiver()
+                .nullable()
+                    .and()
+                .subject()
+                .nullable();
         return this;
     }
 
-    public MailMessageAssert subjectNull() {
-        if (message.getSubject() != null) {
-            failWithMessage("The subject must be null!");
+    public ContentMailMessageAssert content() {
+        return new ContentMailMessageAssert(message, this);
+    }
+
+    public SubjectMailMessageAssert subject() {
+        return new SubjectMailMessageAssert(message, this);
+    }
+
+    public EmailReceiverMailMessageAssert receiver() {
+        return new EmailReceiverMailMessageAssert(message, this);
+    }
+
+
+    public static class ContentMailMessageAssert extends AbstractAssert<ContentMailMessageAssert, MailMessage> {
+        private final MailMessageAssert parentAssert;
+
+        public ContentMailMessageAssert(MailMessage actual, MailMessageAssert parent) {
+            super(actual, ContentMailMessageAssert.class);
+            this.parentAssert = parent;
         }
-        return this;
-    }
 
-    public MailMessageAssert subjectEquals(String required) {
-        if (BooleanUtils.isFalse(message.getSubject().equals(required))) {
-            failWithMessage("Subject must be equal to: %s", required);
+        public MailMessageAssert and() {
+            return parentAssert;
         }
-        return this;
-    }
 
-    public MailMessageAssert subjectNotEquals(String avoid) {
-        if (message.getSubject().equals(avoid)) {
-            failWithMessage("Subject must not be equal to: %s", avoid);
+        @Override
+        public ContentMailMessageAssert isNotNull() {
+            if (actual.getContent() == null) {
+                failWithMessage("Content must be not null!");
+            }
+            return this;
         }
-        return this;
-    }
 
-
-    public MailMessageAssert subjectNotNull() {
-        if (message.getSubject() == null) {
-            failWithMessage("The subject must not be null!");
+        public ContentMailMessageAssert nullable() {
+            if (actual.getContent() != null) {
+                failWithMessage("Content must be null!");
+            }
+            return this;
         }
-        return this;
-    }
 
-    public MailMessageAssert contentNotNull() {
-        if (message.getContent() == null) {
-            failWithMessage("Content must be not null!");
+        public ContentMailMessageAssert exactlyEquals(byte[] content) {
+            assertThat(actual.getContent())
+                    .as("Content must contain exactly the same as required!")
+                    .containsExactly(content);
+            return this;
         }
-        return this;
-    }
 
-    public MailMessageAssert contentNull() {
-        if (message.getContent() != null) {
-            failWithMessage("Content must be null!");
+        public ContentMailMessageAssert exactlyEquals(String content) {
+            assertThat(content)
+                    .as("Content must be the same as required!")
+                    .isEqualTo(new String(actual.getContent()));
+            return this;
         }
-        return this;
     }
 
-    public MailMessageAssert exactlyContentEquals(byte[] content) {
-        assertThat(message.getContent())
-                .as("Content must contain exactly the same as required!")
-                .containsExactly(content);
-        return this;
-    }
+    public static class SubjectMailMessageAssert extends AbstractAssert<SubjectMailMessageAssert, MailMessage> {
+        private final MailMessageAssert parent;
 
-    public MailMessageAssert receiverNotNull() {
-        if (message.getReceiver() == null) {
-            failWithMessage("Receiver must not be null!");
+        public SubjectMailMessageAssert(MailMessage actual, MailMessageAssert parent) {
+            super(actual, SubjectMailMessageAssert.class);
+            this.parent = parent;
         }
-        return this;
+
+        public MailMessageAssert and() {
+            return parent;
+        }
+
+
+        @Override
+        public SubjectMailMessageAssert isNotNull() {
+            if (actual.getSubject() == null) {
+                failWithMessage("The subject must not be null!");
+            }
+            return this;
+        }
+
+        public SubjectMailMessageAssert nullable() {
+            if (actual.getSubject() != null) {
+                failWithMessage("The subject must be null!");
+            }
+            return this;
+        }
+
+        public SubjectMailMessageAssert exactlyEquals(String required) {
+            String subject = actual.getSubject();
+            if (subject == null || BooleanUtils.isFalse(subject.equals(required))) {
+                failWithMessage("Subject must be equal to: \"%s\", but was: \"%s\"", required, subject);
+            }
+            return this;
+        }
+
+        public SubjectMailMessageAssert notEquals(String avoid) {
+            if (actual.getSubject().equals(avoid)) {
+                failWithMessage("Subject must not be equal to: %s", avoid);
+            }
+            return this;
+        }
     }
 
-    public MailMessageAssert receiverNull() {
-        if (message.getReceiver() != null) {
-            failWithMessage("Receiver must be null!");
-        }
-        return this;
-    }
+    public static class EmailReceiverMailMessageAssert extends AbstractAssert<EmailReceiverMailMessageAssert, MailMessage> {
+        private final MailMessageAssert parent;
 
-    public MailMessageAssert receiverEquals(EmailReceiver required) {
-        if (BooleanUtils.isFalse(message.getReceiver().equals(required))) {
-            failWithMessage("The EmailReceiver must be equal to: %s", required);
+        public EmailReceiverMailMessageAssert(MailMessage actual, MailMessageAssert parent) {
+            super(actual, EmailReceiverMailMessageAssert.class);
+            this.parent = parent;
         }
-        return this;
+
+        public MailMessageAssert and() {
+            return parent;
+        }
+
+        @Override
+        public EmailReceiverMailMessageAssert isNotNull() {
+            if (actual.getReceiver() == null) {
+                failWithMessage("Receiver must not be null!");
+            }
+            return this;
+        }
+
+        public EmailReceiverMailMessageAssert nullable() {
+            if (actual.getReceiver() != null) {
+                failWithMessage("Receiver must be null!");
+            }
+            return this;
+        }
+
+        public EmailReceiverMailMessageAssert exactlyEquals(EmailReceiver required) {
+            EmailReceiver receiver = actual.getReceiver();
+            if (receiver == null || BooleanUtils.isFalse(receiver.equals(required))) {
+                failWithMessage("The EmailReceiver must be equal to: %s", required);
+            }
+            return this;
+        }
     }
 }

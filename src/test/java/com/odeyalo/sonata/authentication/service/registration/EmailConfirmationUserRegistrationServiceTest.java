@@ -5,8 +5,9 @@ import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
 import com.odeyalo.sonata.authentication.testing.factory.UserRegistrationServiceTestingFactory;
-import com.odeyalo.sonata.authentication.testing.spy.DelegatingEmailConfirmationCodeGeneratorSenderSpy;
+import com.odeyalo.sonata.authentication.testing.faker.UserRegistrationInfoFaker;
 import com.odeyalo.sonata.authentication.testing.spy.EmptyEmailConfirmationCodeGeneratorSenderSpy;
+import com.odeyalo.sonata.authentication.testing.stubs.ThrowableEmailConfirmationCodeGeneratorSenderStub;
 import com.odeyalo.sonata.authentication.testing.stubs.ThrowableUserRepositoryStub;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,12 +15,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 
+import static com.odeyalo.sonata.authentication.support.validation.ValidationResult.success;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-// SavingConfirmationCodeGenerator - generate and save the confirmation code in some kind of storage
-// EmailConfirmationManager - manager that create, validate and delete confirmation codes and activate the user if code is valid
-// EmailConfirmationCodeGeneratorSender - Facade service to  generate and send confirmation code to email
-// ConfirmationCodeGenerator - generate the confirmation code
-// MailSender - sender that used to send the message to the email
+
+/**
+ * Tests for {@link EmailConfirmationUserRegistrationService}
+ */
 class EmailConfirmationUserRegistrationServiceTest {
 
     @Test
@@ -29,8 +31,8 @@ class EmailConfirmationUserRegistrationServiceTest {
         String email = "odeyalo@gmail.com";
         String password = "password123";
 
-        UserRegistrationServiceTestingFactory.DefaultUserRegistrationServiceBuilder builder = UserRegistrationServiceTestingFactory
-                .createDefaultService();
+        UserRegistrationServiceTestingFactory.EmailConfirmationUserRegistrationServiceBuilder builder = UserRegistrationServiceTestingFactory
+                .createEmailService();
 
         EmptyEmailConfirmationCodeGeneratorSenderSpy senderSpy = new EmptyEmailConfirmationCodeGeneratorSenderSpy();
 
@@ -41,8 +43,11 @@ class EmailConfirmationUserRegistrationServiceTest {
                 .overrideEmailConfirmationCodeGeneratorSender(senderSpy)
                 .build();
 
-        UserRegistrationInfo info = new UserRegistrationInfo(email, password,
-                "MALE", LocalDate.of(2000, 12, 12), false);
+        UserRegistrationInfo info = UserRegistrationInfoFaker.create()
+                .overrideEmail(email)
+                .overridePassword(password)
+                .get();
+
         // When
         RegistrationResult result = userRegistrationService.registerUser(info);
         // Then
@@ -62,23 +67,45 @@ class EmailConfirmationUserRegistrationServiceTest {
     @Test
     @DisplayName("Register user with occurred error and expect RegistrationResult.failed()")
     void registerUserWithException_andExpectFailed() {
-        String email = "odeyalo@gmail.com";
-        String password = "password123";
-
         // Given
         UserRepository userRepository = new ThrowableUserRepositoryStub();
-        EmailConfirmationUserRegistrationService registrationService = UserRegistrationServiceTestingFactory.createDefaultService()
+        EmailConfirmationUserRegistrationService registrationService = UserRegistrationServiceTestingFactory.createEmailService()
                 .overrideUserRepository(userRepository)
                 .build();
 
-
-        UserRegistrationInfo info = new UserRegistrationInfo(email, password,
-                "MALE", LocalDate.of(2000, 12, 12), false);
+        UserRegistrationInfo info = UserRegistrationInfoFaker.create().get();
         // When
         RegistrationResult registrationResult = registrationService.registerUser(info);
         // Then
         assertFalse(registrationResult.success(), "If any error was occurred during saving, then false must be returned!");
         assertEquals(RegistrationResult.RequiredAction.DO_NOTHING, registrationResult.action(), "RequiredAction.DO_NOTHING must be returned!");
         assertEquals(ErrorDetails.SERVER_ERROR, registrationResult.errorDetails(), "ErrorDetails.SERVER_ERROR must be returned if the saving operation cannot be performed because repository throws an exception!");
+    }
+
+
+    @Test
+    @DisplayName("Confirmation message sending is failed, then expect user not be registered and RegistrationException to be thrown")
+    void messageSendingFailed_andExpectExceptionAndUserNotRegistered() {
+        // given
+        ThrowableEmailConfirmationCodeGeneratorSenderStub stub = new ThrowableEmailConfirmationCodeGeneratorSenderStub();
+
+        UserRegistrationServiceTestingFactory.EmailConfirmationUserRegistrationServiceBuilder builder = UserRegistrationServiceTestingFactory.createEmailService()
+                .overrideEmailConfirmationCodeGeneratorSender(stub);
+
+        UserRepository repo = builder.getUserRepository();
+        EmailConfirmationUserRegistrationService registrationService = builder.build();
+
+        UserRegistrationInfo info = UserRegistrationInfoFaker.create().get();
+
+        // when
+        RegistrationResult registrationResult = registrationService.registerUser(info);
+        // then
+        assertFalse(registrationResult.success(), "Registration result must be false, since exception was thrown");
+        assertEquals(RegistrationResult.RequiredAction.DO_NOTHING, registrationResult.action(), "RequiredAction.DO_NOTHING must be returned if error was occurred on server side");
+        assertEquals(ErrorDetails.SERVER_ERROR, registrationResult.errorDetails(), "SERVER_ERROR must be returned if application is unable to send the email message");
+
+        User user = repo.findUserByEmail(info.getEmail());
+
+        assertNull(user, "User must be not saved if error was occurred!");
     }
 }

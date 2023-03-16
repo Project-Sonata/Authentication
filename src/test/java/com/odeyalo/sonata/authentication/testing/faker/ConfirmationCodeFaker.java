@@ -62,12 +62,19 @@ public class ConfirmationCodeFaker {
         return new ConfirmationCodeFaker(RandomUtils.nextLong(), body, false, ConfirmationCode.LifecycleStage.CREATED);
     }
 
+    public static ConfirmationCodeFaker expired() {
+        String body = RandomStringUtils.randomNumeric(8);
+        LocalDateTime createdAt = LocalDateTime.of(2022, 3, 20, 13, 30);
+        LocalDateTime expiresIn = LocalDateTime.of(2022, 3, 20, 13, 40);
+        return new ConfirmationCodeFaker(RandomUtils.nextLong(), body, createdAt, expiresIn, false, ConfirmationCode.LifecycleStage.CREATED);
+    }
+
     public ConfirmationCodeFaker nullId() {
         this.id = null;
         return this;
     }
 
-    public  ConfirmationCodeFaker overrideId(Long id) {
+    public ConfirmationCodeFaker overrideId(Long id) {
         this.id = id;
         return this;
     }

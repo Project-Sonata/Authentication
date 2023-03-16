@@ -5,8 +5,11 @@ import com.odeyalo.sonata.authentication.repository.ConfirmationCodeRepository;
 import com.odeyalo.sonata.authentication.repository.InMemoryConfirmationCodeRepository;
 import com.odeyalo.sonata.authentication.testing.faker.ConfirmationCodeFaker;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Contains the methods to create a new {@link ConfirmationCodeRepository} for tests
@@ -19,6 +22,11 @@ public class ConfirmationCodeRepositoryTestingFactory {
 
     public static InMemoryConfirmationCodeRepository inMemoryPredefined(Map<Long, ConfirmationCode> codes) {
         return new InMemoryConfirmationCodeRepository(codes);
+    }
+
+    public static InMemoryConfirmationCodeRepository inMemoryPredefined(ConfirmationCode... codes) {
+        Map<Long, ConfirmationCode> result = Arrays.stream(codes).collect(Collectors.toMap(ConfirmationCode::getId, Function.identity()));
+        return new InMemoryConfirmationCodeRepository(result);
     }
 
     public static InMemoryConfirmationCodeRepository inMemoryPredefinedRandom() {

@@ -5,6 +5,8 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.assertj.core.api.AbstractAssert;
 
+import java.util.Optional;
+
 /**
  * Custom assertions for {@link ConfirmationCode} class
  */
@@ -24,6 +26,16 @@ public class ConfirmationCodeAssert extends AbstractAssert<ConfirmationCodeAsser
         return new ConfirmationCodeAssert(code);
     }
 
+    public static ConfirmationCodeAssert forOptional(Optional<ConfirmationCode> codeOptional) {
+        if (codeOptional.isEmpty()) {
+            throw new IllegalArgumentException("Optional must contain the element, use notRequired(Optional) method to create ConfirmationCodeAssert from empty Optional");
+        }
+        return new ConfirmationCodeAssert(codeOptional.get());
+    }
+
+    public static ConfirmationCodeAssert notRequired(Optional<ConfirmationCode> codeOptional) {
+        return new ConfirmationCodeAssert(codeOptional.orElse(null));
+    }
 
     public ConfirmationCodeAssert hasNotNullCodeValue() {
         if (confirmationCode.getCode() == null) {
@@ -86,6 +98,14 @@ public class ConfirmationCodeAssert extends AbstractAssert<ConfirmationCodeAsser
     public ConfirmationCodeAssert confirmationCodeLifetime(int lifetime) {
         if (!confirmationCode.getExpirationTime().isEqual(confirmationCode.getCreatedAt().plusMinutes(lifetime))) {
             failWithMessage("Lifetime of the code must be same as provided!");
+        }
+        return this;
+    }
+
+    public ConfirmationCodeAssert lifecycleStage(ConfirmationCode.LifecycleStage requiredStage) {
+        ConfirmationCode.LifecycleStage actualStage = confirmationCode.getLifecycleStage();
+        if (actualStage != requiredStage) {
+            failWithMessage("Wrong confirmation code lifecycle stage. Required: %s, actual: %s", requiredStage, actualStage);
         }
         return this;
     }

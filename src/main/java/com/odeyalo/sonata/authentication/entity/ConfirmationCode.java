@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+import static java.time.LocalDateTime.now;
+
 @Entity
 @Table(name = "confirmation_codes")
 @Data
@@ -34,6 +36,10 @@ public class ConfirmationCode {
     @Column(name = "lifecycle_stage", nullable = false)
     @Enumerated(value = EnumType.STRING)
     private LifecycleStage lifecycleStage;
+
+    public boolean isExpired() {
+        return expirationTime.isBefore(now());
+    }
 
     public enum LifecycleStage {
         /**

@@ -15,12 +15,12 @@ import java.util.function.Consumer;
 
 public class UserRegistrationServiceTestingFactory {
 
-    public static DefaultUserRegistrationServiceBuilder createDefaultService() {
-        return new DefaultUserRegistrationServiceBuilder();
+    public static EmailConfirmationUserRegistrationServiceBuilder createEmailService() {
+        return new EmailConfirmationUserRegistrationServiceBuilder();
     }
 
     public static UserRegistrationService create() {
-        return createDefaultService().build();
+        return createEmailService().build();
     }
 
     public static UserRegistrationService create(Consumer<UserRegistrationService> modifier) {
@@ -32,29 +32,29 @@ public class UserRegistrationServiceTestingFactory {
     }
 
     @Getter
-    public static class DefaultUserRegistrationServiceBuilder {
+    public static class EmailConfirmationUserRegistrationServiceBuilder {
         private UserRepository userRepository = new InMemoryUserRepository();
         private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         private EmailConfirmationCodeGeneratorSender sender = new EmptyEmailConfirmationCodeGeneratorSenderSpy();
 
-        public DefaultUserRegistrationServiceBuilder overrideUserRepository(UserRepository userRepository) {
+        public EmailConfirmationUserRegistrationServiceBuilder overrideUserRepository(UserRepository userRepository) {
             this.userRepository = userRepository;
             return this;
         }
 
-        public DefaultUserRegistrationServiceBuilder overrideUserRepositoryUsers(User... users) {
+        public EmailConfirmationUserRegistrationServiceBuilder overrideUserRepositoryUsers(User... users) {
             for (User user : users) {
                 userRepository.save(user);
             }
             return this;
         }
 
-        public DefaultUserRegistrationServiceBuilder overridePasswordEncoder(PasswordEncoder passwordEncoder) {
+        public EmailConfirmationUserRegistrationServiceBuilder overridePasswordEncoder(PasswordEncoder passwordEncoder) {
             this.passwordEncoder = passwordEncoder;
             return this;
         }
 
-        public DefaultUserRegistrationServiceBuilder overrideEmailConfirmationCodeGeneratorSender(EmailConfirmationCodeGeneratorSender sender) {
+        public EmailConfirmationUserRegistrationServiceBuilder overrideEmailConfirmationCodeGeneratorSender(EmailConfirmationCodeGeneratorSender sender) {
             this.sender = sender;
             return this;
         }

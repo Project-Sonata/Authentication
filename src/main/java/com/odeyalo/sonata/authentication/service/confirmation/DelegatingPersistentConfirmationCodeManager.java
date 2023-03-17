@@ -1,10 +1,11 @@
 package com.odeyalo.sonata.authentication.service.confirmation;
 
 import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
-import com.odeyalo.sonata.authentication.service.confirmation.support.ConfirmationCodeCheckResult;
 import com.odeyalo.sonata.authentication.repository.ConfirmationCodeRepository;
+import com.odeyalo.sonata.authentication.service.confirmation.support.ConfirmationCodeCheckResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 import java.util.Optional;
 
@@ -89,12 +90,19 @@ public class DelegatingPersistentConfirmationCodeManager implements Confirmation
 
     @Override
     public ConfirmationCode changeLifecycleStage(ConfirmationCode code, ConfirmationCode.LifecycleStage stage) {
-        return null;
+        Assert.notNull(code, "The ConfirmationCode must be not null!");
+        Assert.notNull(stage, "The LifecycleStage must be not null!");
+        return changeLifecycleStage(code.getCode(), stage);
     }
 
     @Override
     public ConfirmationCode changeLifecycleStage(String codeValue, ConfirmationCode.LifecycleStage stage) {
-        return null;
+        return confirmationCodeRepository.findConfirmationCodeByCodeValue(codeValue)
+                .map((confirmationCode) -> {
+                    confirmationCode.setLifecycleStage(stage);
+                    return (ConfirmationCode) confirmationCodeRepository.save(confirmationCode);
+                })
+                .orElse(null);
     }
 
     private void changeConfirmationCodeStateAndSave(ConfirmationCode confirmationCode, ConfirmationCode.LifecycleStage currentStage, boolean activated) {

@@ -10,6 +10,8 @@ import com.odeyalo.sonata.authentication.testing.factory.ConfirmationCodeReposit
 import com.odeyalo.sonata.authentication.testing.faker.ConfirmationCodeFaker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.Optional;
 
@@ -157,23 +159,202 @@ class DelegatingPersistentConfirmationCodeManagerTest {
     }
 
     @Test
-    void deleteCode() {
+    @DisplayName("Delete the not existing code by value and expect nothing to be deleted")
+    void deleteNotExistingCodeValue_andExpectNothingToBeDeleted() {
+        // given
+        String notExistingCodeValue = "I just want to hide my face";
+        ConfirmationCode code1 = ConfirmationCodeFaker.numeric().get();
+        ConfirmationCode code2 = ConfirmationCodeFaker.numeric().get();
+        DelegatingPersistentConfirmationCodeManager persistentManager = ConfirmationCodeManagerTestingFactory.createPersistentManagerBuilder()
+                .withPredefinedCodes(code1, code2)
+                .build();
+        // when
+        persistentManager.deleteCode(notExistingCodeValue);
+        // then
+        Optional<ConfirmationCode> foundCode1 = persistentManager.findByCodeValue(code1.getCode());
+        Optional<ConfirmationCode> foundCode2 = persistentManager.findByCodeValue(code2.getCode());
+
+        ConfirmationCodeAssert.forOptional(foundCode1)
+                .as("If code does not exist, then nothing must be deleted")
+                .isEqualTo(code1);
+        ConfirmationCodeAssert.forOptional(foundCode2)
+                .as("If code does not exist, then nothing must be deleted")
+                .isEqualTo(code2);
     }
 
     @Test
-    void testDeleteCode() {
+    @DisplayName("Delete existing code by value and expect code to be deleted")
+    void deleteExistingCodeValue_andExpectCodeToBeDeleted() {
+        // given
+        ConfirmationCode code1 = ConfirmationCodeFaker.numeric().get();
+        ConfirmationCode code2 = ConfirmationCodeFaker.numeric().get();
+
+        DelegatingPersistentConfirmationCodeManager persistentConfirmationCodeManager = ConfirmationCodeManagerTestingFactory.createPersistentManagerBuilder()
+                .withPredefinedCodes(code1, code2)
+                .build();
+        // when
+        persistentConfirmationCodeManager.deleteCode(code1.getCode());
+
+        // then
+        Optional<ConfirmationCode> foundCode1 = persistentConfirmationCodeManager.findByCodeValue(code1.getCode());
+        Optional<ConfirmationCode> foundCode2 = persistentConfirmationCodeManager.findByCodeValue(code2.getCode());
+
+        assertThat(foundCode1)
+                .as("The code must be deleted if code value exists in manager!")
+                .isEmpty();
+
+        ConfirmationCodeAssert.forOptional(foundCode2)
+                .as("Only confirmation code that has provided code value must be deleted")
+                .isEqualTo(code2);
     }
 
     @Test
-    void getLifecycleStage() {
+    @DisplayName("Get lifecycle stage of the code and expect stage to be CREATED")
+    void getLifecycleStageForNewCode_andExpectStageToBeCreated() {
+        // given
+        DelegatingPersistentConfirmationCodeManager persistentConfirmationCodeManager = ConfirmationCodeManagerTestingFactory.createPersistentManager();
+        // when
+        ConfirmationCode newCode = persistentConfirmationCodeManager.generateCode();
+        ConfirmationCode.LifecycleStage actualLifecycleStage = persistentConfirmationCodeManager.getLifecycleStage(newCode);
+        // then
+        assertThat(actualLifecycleStage)
+                .as("If code was created just now, then LifecycleStage should be CREATED")
+                .isEqualTo(ConfirmationCode.LifecycleStage.CREATED);
     }
 
     @Test
-    void testGetLifecycleStage() {
+    @DisplayName("Get lifecycle stage for activated code and expect LifecycleStage.ACTIVATED")
+    void getStageForActivatedCode_andExpectStageToBeActivated() {
+        // given
+        DelegatingPersistentConfirmationCodeManager persistentConfirmationCodeManager = ConfirmationCodeManagerTestingFactory.createPersistentManager();
+        // when
+        ConfirmationCode newCode = persistentConfirmationCodeManager.generateCode();
+        // Activate the existing code to change lifecycle stage and check if the stage has been changed
+        persistentConfirmationCodeManager.verifyCodeAndActive(newCode.getCode());
+        ConfirmationCode.LifecycleStage actualLifecycleStage = persistentConfirmationCodeManager.getLifecycleStage(newCode);
+        // then
+        assertThat(actualLifecycleStage)
+                .as("If the code was activated, then lifecycle stage must be changed to ACTIVATED")
+                .isEqualTo(ConfirmationCode.LifecycleStage.ACTIVATED);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ConfirmationCode.LifecycleStage.class)
+    @DisplayName("Get lifecycle stage for code and expect correct stage to be returned")
+    void getLifeCycleStageForCode_andExpectCorrectStage(ConfirmationCode.LifecycleStage expectedLifecycleStage) {
+        // given
+        ConfirmationCode code = ConfirmationCodeFaker.numeric()
+                .atSpecificLifecycle(expectedLifecycleStage)
+                .get();
+
+        DelegatingPersistentConfirmationCodeManager persistentConfirmationCodeManager = ConfirmationCodeManagerTestingFactory
+                .createPersistentManagerBuilder()
+                .withPredefinedCodes(code)
+                .build();
+        // when
+        ConfirmationCode.LifecycleStage lifecycleStage = persistentConfirmationCodeManager.getLifecycleStage(code);
+        // then
+        assertThat(lifecycleStage)
+                .as("If code exists in manager, then current code lifecycle stage must be returned!")
+                .isEqualTo(expectedLifecycleStage);
     }
 
     @Test
-    void changeLifecycleStage() {
+    @DisplayName("Retrieve lifecycle stage of the non-existing code and expect a null value to be returned")
+    void getStageOfNotExistingCode_andExpectNull() {
+        // given
+        ConfirmationCode confirmationCode = ConfirmationCodeFaker.numeric().get();
+        DelegatingPersistentConfirmationCodeManager persistentConfirmationCodeManager = ConfirmationCodeManagerTestingFactory.createPersistentManager();
+        // when
+        ConfirmationCode.LifecycleStage actualStage = persistentConfirmationCodeManager.getLifecycleStage(confirmationCode);
+        // then
+        assertThat(actualStage)
+                .describedAs("If code does not exist, then null must be returned")
+                .isEqualTo(null);
+    }
+
+    @Test
+    @DisplayName("Get lifecycle stage of the code by code value and expect stage to be CREATED")
+    void getLifecycleStageByCodeValue_andExpectStageToBeCreated() {
+        // given
+        DelegatingPersistentConfirmationCodeManager persistentConfirmationCodeManager = ConfirmationCodeManagerTestingFactory.createPersistentManager();
+        // when
+        ConfirmationCode newCode = persistentConfirmationCodeManager.generateCode();
+        ConfirmationCode.LifecycleStage actualLifecycleStage = persistentConfirmationCodeManager.getLifecycleStage(newCode.getCode());
+        // then
+        assertThat(actualLifecycleStage)
+                .as("If code was created just now, then LifecycleStage should be CREATED")
+                .isEqualTo(ConfirmationCode.LifecycleStage.CREATED);
+    }
+
+
+    @Test
+    @DisplayName("Get lifecycle stage for activated code by code value and expect LifecycleStage.ACTIVATED")
+    void getStageForActivatedCodeByCodeValue_andExpectStageToBeActivated() {
+        // given
+        DelegatingPersistentConfirmationCodeManager persistentConfirmationCodeManager = ConfirmationCodeManagerTestingFactory.createPersistentManager();
+        // when
+        ConfirmationCode newCode = persistentConfirmationCodeManager.generateCode();
+        // Activate the existing code to change lifecycle stage and check if the stage has been changed
+        persistentConfirmationCodeManager.verifyCodeAndActive(newCode.getCode());
+        ConfirmationCode.LifecycleStage actualLifecycleStage = persistentConfirmationCodeManager.getLifecycleStage(newCode.getCode());
+        // then
+        assertThat(actualLifecycleStage)
+                .as("If the code was activated, then lifecycle stage must be changed to ACTIVATED")
+                .isEqualTo(ConfirmationCode.LifecycleStage.ACTIVATED);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ConfirmationCode.LifecycleStage.class)
+    @DisplayName("Get lifecycle stage for code and expect correct stage to be returned")
+    void getLifeCycleStageForCodeByCodeValue_andExpectCorrectStage(ConfirmationCode.LifecycleStage expectedLifecycleStage) {
+        // given
+        ConfirmationCode code = ConfirmationCodeFaker.numeric()
+                .atSpecificLifecycle(expectedLifecycleStage)
+                .get();
+
+        DelegatingPersistentConfirmationCodeManager persistentConfirmationCodeManager = ConfirmationCodeManagerTestingFactory
+                .createPersistentManagerBuilder()
+                .withPredefinedCodes(code)
+                .build();
+        // when
+        ConfirmationCode.LifecycleStage lifecycleStage = persistentConfirmationCodeManager.getLifecycleStage(code.getCode());
+        // then
+        assertThat(lifecycleStage)
+                .as("If code exists in manager, then current code lifecycle stage must be returned!")
+                .isEqualTo(expectedLifecycleStage);
+    }
+
+
+    @Test
+    @DisplayName("Retrieve lifecycle stage of the non-existing code and expect a null value to be returned")
+    void getStageOfNotExistingCodeByCodeValue_andExpectNull() {
+        // given
+        String notExistingCodeValue = "Once in a while when i wake up I find myself crying";
+        DelegatingPersistentConfirmationCodeManager persistentConfirmationCodeManager = ConfirmationCodeManagerTestingFactory.createPersistentManager();
+        // when
+        ConfirmationCode.LifecycleStage actualStage = persistentConfirmationCodeManager.getLifecycleStage(notExistingCodeValue);
+        // then
+        assertThat(actualStage)
+                .describedAs("If code does not exist, then null must be returned")
+                .isEqualTo(null);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ConfirmationCode.LifecycleStage.class)
+    @DisplayName("Change the lifecycle of the code and expect lifecycle stage to be changed")
+    void changeLifecycleStage_andExpectStageToBeChanged(ConfirmationCode.LifecycleStage stage) {
+        // given
+        ConfirmationCode confirmationCode = ConfirmationCodeFaker.numeric().get();
+        DelegatingPersistentConfirmationCodeManager persistentConfirmationCodeManager = ConfirmationCodeManagerTestingFactory.createPersistentManager();
+        // when
+        persistentConfirmationCodeManager.changeLifecycleStage(confirmationCode, stage);
+        // then
+//        Optional<ConfirmationCode> foundCode = persistentConfirmationCodeManager.findByCodeValue(confirmationCode.getCode());
+//        ConfirmationCodeAssert.smartEquals(foundCode)
+//                .lifecycleStageEqualsTo(ConfirmationCode.LifecycleStage.CREATED)
+//                .check()
+                // confirmationCode.equals(foundCode).but().lifecycleStageEqualsTo(CREATED).and()
     }
 
     @Test

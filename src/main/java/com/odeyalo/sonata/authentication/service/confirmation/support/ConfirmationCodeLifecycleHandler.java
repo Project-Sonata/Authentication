@@ -8,6 +8,10 @@ import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
 public interface ConfirmationCodeLifecycleHandler {
     /**
      * Provide the info about current confirmation code lifecycle stage
+     * <p>
+     *     <strong>NOTE: </strong> The method SHOULD NOT return the code lifecycle stage by using the {@link ConfirmationCode#getLifecycleStage()} method
+     *     and SHOULD do it by returning the current lifecycle saved by the implementation class
+     * </p>
      * @param code - confirmation code entity
      * @return - lifecycle stage of the provided confirmation code
      */

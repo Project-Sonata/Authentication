@@ -61,7 +61,8 @@ public class DelegatingPersistentConfirmationCodeManager implements Confirmation
 
     @Override
     public void deleteCode(String codeValue) {
-
+        confirmationCodeRepository.deleteByCodeValue(codeValue);
+        logger.info("Removed value from repository: {}", codeValue);
     }
 
     @Override
@@ -71,12 +72,19 @@ public class DelegatingPersistentConfirmationCodeManager implements Confirmation
 
     @Override
     public ConfirmationCode.LifecycleStage getLifecycleStage(ConfirmationCode code) {
-        return null;
+        code = confirmationCodeRepository.findConfirmationCodeByCodeValue(code.getCode()).orElse(null);
+        if (code == null) {
+            return null;
+        }
+        return code.getLifecycleStage();
     }
 
     @Override
     public ConfirmationCode.LifecycleStage getLifecycleStage(String codeValue) {
-        return null;
+        Optional<ConfirmationCode> optional = confirmationCodeRepository.findConfirmationCodeByCodeValue(codeValue);
+        return optional
+                .map(ConfirmationCode::getLifecycleStage)
+                .orElse(null);
     }
 
     @Override
@@ -89,8 +97,8 @@ public class DelegatingPersistentConfirmationCodeManager implements Confirmation
         return null;
     }
 
-    private void changeConfirmationCodeStateAndSave(ConfirmationCode confirmationCode, ConfirmationCode.LifecycleStage currectStage, boolean activated) {
-        confirmationCode.setLifecycleStage(currectStage);
+    private void changeConfirmationCodeStateAndSave(ConfirmationCode confirmationCode, ConfirmationCode.LifecycleStage currentStage, boolean activated) {
+        confirmationCode.setLifecycleStage(currentStage);
         confirmationCode.setActivated(activated);
         confirmationCodeRepository.save(confirmationCode);
     }

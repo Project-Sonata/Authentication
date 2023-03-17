@@ -35,7 +35,8 @@ public class ConfirmationCode {
 
     @Column(name = "lifecycle_stage", nullable = false)
     @Enumerated(value = EnumType.STRING)
-    private LifecycleStage lifecycleStage;
+    @Builder.Default
+    private LifecycleStage lifecycleStage = LifecycleStage.CREATED;
 
     public boolean isExpired() {
         return expirationTime.isBefore(now());

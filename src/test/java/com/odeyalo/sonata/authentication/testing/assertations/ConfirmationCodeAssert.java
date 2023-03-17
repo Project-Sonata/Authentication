@@ -5,6 +5,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.assertj.core.api.AbstractAssert;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
@@ -108,5 +109,122 @@ public class ConfirmationCodeAssert extends AbstractAssert<ConfirmationCodeAsser
             failWithMessage("Wrong confirmation code lifecycle stage. Required: %s, actual: %s", requiredStage, actualStage);
         }
         return this;
+    }
+
+    public EqualsHolder equals(ConfirmationCode code) {
+        SmartEqualsConfirmationCodeAssert excluded = new SmartEqualsConfirmationCodeAssert(actual, code, this);
+        return new EqualsHolder(excluded,
+                () -> {
+                    if (!confirmationCode.equals(code)) {
+                        failWithMessage("Confirmation codes are not equals! Required: %s but was: %s", confirmationCode, code);
+                    }
+                    return this;
+                });
+    }
+
+    public static class EqualsHolder {
+        private final SmartEqualsConfirmationCodeAssert smartEqualsConfirmationCodeAssert;
+        private final Equals equals;
+
+        public EqualsHolder(SmartEqualsConfirmationCodeAssert smartEqualsConfirmationCodeAssert, Equals equals) {
+            this.smartEqualsConfirmationCodeAssert = smartEqualsConfirmationCodeAssert;
+            this.equals = equals;
+        }
+
+        public ConfirmationCodeAssert check() {
+            return equals.check();
+        }
+
+        public SmartEqualsConfirmationCodeAssert but() {
+            return smartEqualsConfirmationCodeAssert;
+        }
+    }
+
+    public interface Equals {
+        ConfirmationCodeAssert check();
+    }
+
+    public static class SmartEqualsConfirmationCodeAssert extends AbstractAssert<SmartEqualsConfirmationCodeAssert, ConfirmationCode> implements Equals {
+        private Long requiredId;
+        private String requiredCode;
+        private LocalDateTime requiredCreatedAt;
+        private LocalDateTime requiredExpirationTime;
+        private boolean requiredActivatedState;
+        private ConfirmationCode.LifecycleStage requiredLifecycleStage;
+        // This confirmation code will be compared with all values above
+        private final ConfirmationCode equalityChallenger;
+        private final ConfirmationCodeAssert parent;
+
+        /**
+         * Create a new {@link SmartEqualsConfirmationCodeAssert}
+         *
+         * @param equalityChallenger - challenger to check equality with other ConfirmationCode
+         * @param code               - code that can be customized and compared with equalityChallenger
+         * @param parent             - parent ConfirmationCodeAssert, used to create smart builder
+         */
+        public SmartEqualsConfirmationCodeAssert(ConfirmationCode equalityChallenger, ConfirmationCode code, ConfirmationCodeAssert parent) {
+            super(code, SmartEqualsConfirmationCodeAssert.class);
+            this.requiredId = code.getId();
+            this.requiredCode = code.getCode();
+            this.requiredCreatedAt = code.getCreatedAt();
+            this.requiredExpirationTime = code.getExpirationTime();
+            this.requiredActivatedState = code.isActivated();
+            this.requiredLifecycleStage = code.getLifecycleStage();
+            this.parent = parent;
+            this.equalityChallenger = equalityChallenger;
+        }
+
+        public SmartEqualsConfirmationCodeAssert idMustEqualsTo(Long requiredId) {
+            this.requiredId = requiredId;
+            return this;
+        }
+
+        public SmartEqualsConfirmationCodeAssert codeMustEqualTo(String requiredCodeValue) {
+            this.requiredCode = requiredCodeValue;
+            return this;
+        }
+
+        public SmartEqualsConfirmationCodeAssert lifecycleStageMustEqualsTo(ConfirmationCode.LifecycleStage stage) {
+            this.requiredLifecycleStage = stage;
+            return this;
+        }
+
+        public SmartEqualsConfirmationCodeAssert createdAtMustEqualsTo(LocalDateTime createdAt) {
+            this.requiredCreatedAt = createdAt;
+            return this;
+        }
+
+        public SmartEqualsConfirmationCodeAssert expirationTimeMustEqualsTo(LocalDateTime expirationTime) {
+            this.requiredExpirationTime = expirationTime;
+            return this;
+        }
+
+        public SmartEqualsConfirmationCodeAssert activatedMustEqualsTo(boolean activated) {
+            this.requiredActivatedState = activated;
+            return this;
+        }
+
+        @Override
+        public ConfirmationCodeAssert check() {
+            if (!equalityChallenger.getId().equals(requiredId)) {
+                failWithMessage("Wrong ID. Required: %s, actual: %s", requiredId, equalityChallenger.getId());
+            }
+            if (equalityChallenger.isActivated() != requiredActivatedState) {
+                failWithMessage("Wrong 'activated' state. Required: %s, actual: %s", requiredActivatedState, equalityChallenger.isActivated());
+            }
+            if (equalityChallenger.getLifecycleStage() != requiredLifecycleStage) {
+                failWithMessage("Wrong lifecycle stage. Required: %s, actual: %s", requiredLifecycleStage, equalityChallenger.getLifecycleStage());
+            }
+            if (!equalityChallenger.getCreatedAt().isEqual(requiredCreatedAt)) {
+                failWithMessage("Wrong creation time. Required: %s, actual: %s", requiredCreatedAt, equalityChallenger.getCreatedAt());
+            }
+            if (!equalityChallenger.getExpirationTime().isEqual(requiredExpirationTime)) {
+                failWithMessage("Wrong expiration time. Required: %s, actual: %s", requiredExpirationTime, equalityChallenger.getExpirationTime());
+            }
+            if (!equalityChallenger.getCode().equals(requiredCode)) {
+                failWithMessage("Wrong code value. Required: %s, actual: %s", requiredCode, equalityChallenger.getCode());
+            }
+            return parent;
+        }
     }
 }

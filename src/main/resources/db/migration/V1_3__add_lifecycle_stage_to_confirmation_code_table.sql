@@ -1,0 +1,1 @@
+ALTER TABLE confirmation_codes ADD COLUMN lifecycle_stage VARCHAR(100) NOT NULL DEFAULT 'CREATED'

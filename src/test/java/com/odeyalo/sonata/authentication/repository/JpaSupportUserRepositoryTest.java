@@ -2,10 +2,7 @@ package com.odeyalo.sonata.authentication.repository;
 
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.testing.factory.UserEntityTestingFactory;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -27,19 +24,18 @@ class JpaSupportUserRepositoryTest {
     private JpaSupportUserRepository userRepository;
     public static final String EXISTING_EMAIL = "odeyalo@gmail.com";
     public static final String NOT_EXISTING_EMAIL = "king@gmail.com";
-
     User existingUser = UserEntityTestingFactory.createValid();
 
     @BeforeAll
     void setUp() {
-        ((JpaRepository<User, Long>) userRepository).save(existingUser);
+        existingUser =  ((JpaRepository<User, Long>) userRepository).save(existingUser);
     }
 
 
     @Test
     @DisplayName("Find user by existing email and expect same user")
     void findUserByExistingEmail_andExpectNonNullUser() {
-        User user = userRepository.findUserByEmail(EXISTING_EMAIL);
+        User user = userRepository.findUserByEmail(existingUser.getEmail());
         assertEquals(existingUser, user, "Users must be equal if they have same email!");
     }
 
@@ -49,5 +45,10 @@ class JpaSupportUserRepositoryTest {
         User user = userRepository.findUserByEmail(NOT_EXISTING_EMAIL);
 
         assertNull(user, "If repository does not contain user with email, then null must be returned!");
+    }
+
+    @AfterEach
+    void clear() {
+        userRepository.deleteAll();
     }
 }

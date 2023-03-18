@@ -4,6 +4,7 @@ import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
 import com.odeyalo.sonata.authentication.support.validation.UserRegistrationInfoValidator;
 import com.odeyalo.sonata.authentication.support.validation.ValidationResult;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 @Component
 public class DefaultUserRegistrationManager implements UserRegistrationManager {
@@ -17,6 +18,7 @@ public class DefaultUserRegistrationManager implements UserRegistrationManager {
 
     @Override
     public RegistrationResult registerUser(UserRegistrationInfo info) {
+        Assert.notNull(info, "The UserRegistrationInfo must be not null!");
         ValidationResult result = validator.validateInfo(info);
 
         if (!result.isSuccess()) {

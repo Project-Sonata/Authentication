@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.authentication.testing.factory;
 
+import com.odeyalo.sonata.authentication.repository.UserRepository;
 import com.odeyalo.sonata.authentication.support.validation.UserRegistrationInfoValidationStepContainer;
 import com.odeyalo.sonata.authentication.support.validation.UserRegistrationInfoValidationStepRegistry;
 import com.odeyalo.sonata.authentication.support.validation.step.EmailAlreadyTakenCheckUserRegistrationInfoValidationStep;
@@ -23,9 +24,9 @@ public class UserRegistrationInfoValidationStepRegistryTestingFactory {
     public static UserRegistrationInfoValidationStepRegistry create() {
 
         List<UserRegistrationInfoValidationStep> validators = new ArrayList<>();
-
+        UserRepository userRepository = UserRepositoryTestingFactory.create();
         validators.add(new EmailRegexUserRegistrationInfoValidationStep());
-        validators.add(new EmailAlreadyTakenCheckUserRegistrationInfoValidationStep());
+        validators.add(new EmailAlreadyTakenCheckUserRegistrationInfoValidationStep(userRepository));
         validators.add(new PasswordRegexCheckUserRegistrationInfoValidationStep());
 
         return new UserRegistrationInfoValidationStepContainer(validators);

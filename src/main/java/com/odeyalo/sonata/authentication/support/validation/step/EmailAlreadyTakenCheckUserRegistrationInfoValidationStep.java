@@ -2,7 +2,10 @@ package com.odeyalo.sonata.authentication.support.validation.step;
 
 import com.odeyalo.sonata.authentication.common.ErrorDetails;
 import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.entity.User;
+import com.odeyalo.sonata.authentication.repository.UserRepository;
 import com.odeyalo.sonata.authentication.support.validation.ValidationResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -10,12 +13,16 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class EmailAlreadyTakenCheckUserRegistrationInfoValidationStep implements UserRegistrationInfoValidationStep {
+    private final UserRepository userRepository;
+
+    @Autowired
+    public EmailAlreadyTakenCheckUserRegistrationInfoValidationStep(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public ValidationResult validate(UserRegistrationInfo userRegistrationInfo) {
-        if (userRegistrationInfo.getEmail().equals("alreadytaken@gmail.com")) {
-            return ValidationResult.failed( ErrorDetails.EMAIL_ALREADY_TAKEN);
-        }
-        return ValidationResult.success();
+        User user = userRepository.findUserByEmail(userRegistrationInfo.getEmail());
+        return user == null ? ValidationResult.success() : ValidationResult.failed(ErrorDetails.EMAIL_ALREADY_TAKEN);
     }
 }

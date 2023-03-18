@@ -36,17 +36,20 @@ public class UserRegistrationInfoValidatorTestingFactory {
     }
 
     public static UserRegistrationInfoValidator createRealValidator() {
-        List<UserRegistrationInfoValidationStep> validators = new ArrayList<>();
-
-        validators.add(new EmailRegexUserRegistrationInfoValidationStep());
-        validators.add(new EmailAlreadyTakenCheckUserRegistrationInfoValidationStep());
-        validators.add(new PasswordRegexCheckUserRegistrationInfoValidationStep());
-
-        return new DefaultChainUserRegistrationInfoValidator(new UserRegistrationInfoValidationStepContainer(validators));
+        UserRegistrationInfoValidationStepRegistry validators = UserRegistrationInfoValidationStepRegistryTestingFactory.create();
+        return new DefaultChainUserRegistrationInfoValidator(validators);
     }
 
     public static DefaultChainUserRegistrationInfoValidator createChainedValidator() {
         UserRegistrationInfoValidationStepRegistry registry = UserRegistrationInfoValidationStepRegistryTestingFactory.create();
+        return new DefaultChainUserRegistrationInfoValidator(registry);
+    }
+
+    public static DefaultChainUserRegistrationInfoValidator createChainedValidator(UserRegistrationInfoValidationStep... steps) {
+        UserRegistrationInfoValidationStepRegistry registry = UserRegistrationInfoValidationStepRegistryTestingFactory.create();
+        for (UserRegistrationInfoValidationStep step : steps) {
+            registry.add(step);
+        }
         return new DefaultChainUserRegistrationInfoValidator(registry);
     }
 }

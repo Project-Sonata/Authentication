@@ -8,10 +8,10 @@ import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
 import com.odeyalo.sonata.authentication.dto.response.TokensResponse;
 import com.odeyalo.sonata.authentication.dto.response.UserRegistrationConfirmationResponseDto;
 import com.odeyalo.sonata.authentication.entity.User;
+import com.odeyalo.sonata.authentication.repository.JpaSupportUserRepository;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import com.odeyalo.sonata.authentication.testing.factory.UserEntityTestingFactory;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,17 +42,24 @@ class AuthControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private UserRepository userRepository;
+    private JpaSupportUserRepository userRepository;
 
     public static final String SIGNUP_ENDPOINT_NAME = "/auth/signup";
     public static final String EMAIL_CONFIRMATION_ENDPOINT_NAME = "/auth/confirm/email";
 
     @Nested
+    @TestInstance(value = TestInstance.Lifecycle.PER_CLASS)
     class RegistrationAuthControllerTests {
         public static final String ALREADY_TAKEN_EMAIL = "alreadytaken@gmail.com";
         public static final String CONFIRMATION_URL_RELATION_NAME = "confirmation_url";
         public static final String SELF_RELATION_NAME = "self";
         public static final String INVALID_PASSWORD = "invalid";
+
+        @BeforeAll
+        void setup() {
+            User user = UserEntityTestingFactory.createAndModify((modifier) -> modifier.setEmail(ALREADY_TAKEN_EMAIL));
+            ((UserRepository) userRepository).save(user);
+        }
 
         /**
          * The test case tests the '/auth/signup endpoint', the test purpose is to register the user with valid JSON body
@@ -126,7 +133,7 @@ class AuthControllerTest {
             ApiErrorDetailsInfo errorInfo = JsonTestUtils.convertToPojo(mvcResult, ApiErrorDetailsInfo.class);
             HttpStatus httpStatus = errorInfo.toHttpStatus();
             assertEquals(beforeRequestCount, afterRequestCount, "Count must be same if user was not saved");
-            assertEquals(HttpStatus.BAD_REQUEST,httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
+            assertEquals(HttpStatus.BAD_REQUEST, httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
             assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
             assertEquals(errorInfo.getErrorDetails(), ErrorDetails.INVALID_EMAIL, "If email is incorrect, then invalid_email error message must be returned");
 
@@ -158,7 +165,7 @@ class AuthControllerTest {
             HttpStatus httpStatus = errorInfo.toHttpStatus();
 
             assertEquals(beforeRequestCount, afterRequestCount, "Count must be same if user was not saved");
-            assertEquals(HttpStatus.BAD_REQUEST,httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
+            assertEquals(HttpStatus.BAD_REQUEST, httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
             assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
             assertEquals(errorInfo.getErrorDetails(), ErrorDetails.EMAIL_ALREADY_TAKEN, "If email is already taken by other user, then email_already_taken error message must be returned");
         }
@@ -190,9 +197,14 @@ class AuthControllerTest {
             HttpStatus httpStatus = errorInfo.toHttpStatus();
 
             assertEquals(beforeRequestCount, afterRequestCount, "Count must be same if user was not saved");
-            assertEquals(HttpStatus.BAD_REQUEST,httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
+            assertEquals(HttpStatus.BAD_REQUEST, httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
             assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
-            assertEquals(errorInfo.getErrorDetails(), ErrorDetails.INVALID_PASSWORD, "If the password is incorrect, then invalid_password error must be returned");
+            assertEquals(ErrorDetails.INVALID_PASSWORD, errorInfo.getErrorDetails(), "If the password is incorrect, then invalid_password error must be returned");
+        }
+
+        @AfterEach
+        void clearDB() {
+            userRepository.deleteAll();
         }
     }
 

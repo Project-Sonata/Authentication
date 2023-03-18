@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.authentication.service.confirmation;
 
+import com.odeyalo.sonata.authentication.common.ErrorDetails;
 import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
 import com.odeyalo.sonata.authentication.repository.InMemoryConfirmationCodeRepository;
 import com.odeyalo.sonata.authentication.repository.NullConfirmationCodeRepositoryStub;
@@ -159,6 +160,22 @@ class DelegatingPersistentConfirmationCodeManagerTest {
     }
 
     @Test
+    @DisplayName("Verify DENIED code BUT not expired code and expect ConfirmationCodeCheckResult.ALREADY_ACTIVATED")
+    void verifyActivatedButNotExpiredCode_andExpectAlreadyActivatedStatus() {
+        // given
+        ConfirmationCode activatedCode = ConfirmationCodeFaker.numeric().atSpecificLifecycle(ConfirmationCode.LifecycleStage.DENIED).get();
+        DelegatingPersistentConfirmationCodeManager persistentManager = ConfirmationCodeManagerTestingFactory.createPersistentManagerBuilder()
+                .withPredefinedCodes(activatedCode)
+                .build();
+        // when
+        ConfirmationCodeCheckResult result = persistentManager.verifyCodeAndActive(activatedCode.getCode());
+        // then
+        assertThat(result)
+                .as("If code is activated but not expired, then ConfirmationCodeCheckResult.ALREADY_ACTIVATED must be returned")
+                .isEqualTo(ConfirmationCodeCheckResult.ALREADY_ACTIVATED);
+    }
+
+    @Test
     @DisplayName("Delete the not existing code by value and expect nothing to be deleted")
     void deleteNotExistingCodeValue_andExpectNothingToBeDeleted() {
         // given
@@ -205,6 +222,84 @@ class DelegatingPersistentConfirmationCodeManagerTest {
 
         ConfirmationCodeAssert.forOptional(foundCode2)
                 .as("Only confirmation code that has provided code value must be deleted")
+                .isEqualTo(code2);
+    }
+
+    @Test
+    @DisplayName("Delete by code entity and expect code to be deleted")
+    void deleteByEntity_andExpectToBeDeleted() {
+        // given
+        ConfirmationCode code1 = ConfirmationCodeFaker.numeric().overrideId(null).get();
+        ConfirmationCode code2 = ConfirmationCodeFaker.numeric().get();
+
+        DelegatingPersistentConfirmationCodeManager persistentConfirmationCodeManager = ConfirmationCodeManagerTestingFactory.createPersistentManagerBuilder()
+                .withPredefinedCodes(code1, code2)
+                .build();
+        // when
+        persistentConfirmationCodeManager.deleteCode(code1);
+
+        // then
+        Optional<ConfirmationCode> foundCode1 = persistentConfirmationCodeManager.findByCodeValue(code1.getCode());
+        Optional<ConfirmationCode> foundCode2 = persistentConfirmationCodeManager.findByCodeValue(code2.getCode());
+
+        assertThat(foundCode1)
+                .as("The code must be deleted if code exists in manager!")
+                .isEmpty();
+
+        ConfirmationCodeAssert.forOptional(foundCode2)
+                .as("Only confirmation code that has provided code must be deleted")
+                .isEqualTo(code2);
+    }
+
+    @Test
+    @DisplayName("Delete the non-existing code by entity value and expect nothing to be deleted")
+    void deleteNotExistingCodeEntity_andExpectNothingToBeDeleted() {
+        // given
+        String notExistingCodeValue = "I just want to hide my face";
+        ConfirmationCode code1 = ConfirmationCodeFaker.numeric().get();
+        ConfirmationCode code2 = ConfirmationCodeFaker.numeric().get();
+        ConfirmationCode notExistingCode = ConfirmationCodeFaker.withBody(notExistingCodeValue).get();
+        DelegatingPersistentConfirmationCodeManager persistentManager = ConfirmationCodeManagerTestingFactory.createPersistentManagerBuilder()
+                .withPredefinedCodes(code1, code2)
+                .build();
+        // when
+        persistentManager.deleteCode(notExistingCode);
+        // then
+        Optional<ConfirmationCode> foundCode1 = persistentManager.findByCodeValue(code1.getCode());
+        Optional<ConfirmationCode> foundCode2 = persistentManager.findByCodeValue(code2.getCode());
+
+        ConfirmationCodeAssert.forOptional(foundCode1)
+                .as("If code does not exist, then nothing must be deleted")
+                .isEqualTo(code1);
+        ConfirmationCodeAssert.forOptional(foundCode2)
+                .as("If code does not exist, then nothing must be deleted")
+                .isEqualTo(code2);
+    }
+
+    @Test
+    @DisplayName("Delete by id and expect code to be deleted")
+    void deleteById_andExpectCodeToBeDeleted() {
+        // given
+        ConfirmationCode code1 = ConfirmationCodeFaker.numeric().get();
+        ConfirmationCode code2 = ConfirmationCodeFaker.numeric().get();
+        DelegatingPersistentConfirmationCodeManager persistentManager = ConfirmationCodeManagerTestingFactory.createPersistentManagerBuilder()
+                .withPredefinedCodes(code1, code2)
+                .build();
+
+        // when
+        ConfirmationCode toDelete = ConfirmationCodeFaker.numeric().overrideId(code1.getId()).get();
+        persistentManager.deleteCode(toDelete);
+
+        // then
+        Optional<ConfirmationCode> foundCode1 = persistentManager.findByCodeValue(code1.getCode());
+        Optional<ConfirmationCode> foundCode2 = persistentManager.findByCodeValue(code2.getCode());
+
+        assertThat(foundCode1)
+                .as("The code must be deleted if code ID exists in manager!")
+                .isEmpty();
+
+        ConfirmationCodeAssert.forOptional(foundCode2)
+                .as("Only confirmation code that has provided code must be deleted")
                 .isEqualTo(code2);
     }
 
@@ -393,7 +488,7 @@ class DelegatingPersistentConfirmationCodeManagerTest {
     @ParameterizedTest
     @EnumSource(value = ConfirmationCode.LifecycleStage.class)
     @DisplayName("Change the lifecycle of the code by code value and expect lifecycle stage to be changed")
-    void changeLifecycleStageByCideValue_andExpectStageToBeChanged(ConfirmationCode.LifecycleStage stage) {
+    void changeLifecycleStageByCodeValue_andExpectStageToBeChanged(ConfirmationCode.LifecycleStage stage) {
         // given
         ConfirmationCode confirmationCode = ConfirmationCodeFaker.numeric().get();
 
@@ -439,5 +534,4 @@ class DelegatingPersistentConfirmationCodeManagerTest {
                 .as("Nothing must be affected if the provided code does not exist in the manager!")
                 .isEqualTo(confirmationCode);
     }
-
 }

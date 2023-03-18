@@ -9,6 +9,9 @@ import org.springframework.util.Assert;
 
 import java.util.Optional;
 
+import static com.odeyalo.sonata.authentication.entity.ConfirmationCode.LifecycleStage.ACTIVATED;
+import static com.odeyalo.sonata.authentication.entity.ConfirmationCode.LifecycleStage.DENIED;
+
 /**
  * {@link ConfirmationCodeManager} implementation that generate the confirmation code by delegating and store the generated
  * confirmation codes in {@link ConfirmationCodeRepository}.
@@ -52,11 +55,16 @@ public class DelegatingPersistentConfirmationCodeManager implements Confirmation
         ConfirmationCode confirmationCode = optional.get();
 
         if (confirmationCode.isExpired()) {
-            changeConfirmationCodeStateAndSave(confirmationCode, ConfirmationCode.LifecycleStage.DENIED, false);
+            changeConfirmationCodeStateAndSave(confirmationCode, DENIED, false);
             return ConfirmationCodeCheckResult.ALREADY_EXPIRED;
         }
+        ConfirmationCode.LifecycleStage lifecycleStage = confirmationCode.getLifecycleStage();
 
-        changeConfirmationCodeStateAndSave(confirmationCode, ConfirmationCode.LifecycleStage.ACTIVATED, true);
+        if ((lifecycleStage == ACTIVATED) || (lifecycleStage == DENIED)) {
+            return ConfirmationCodeCheckResult.ALREADY_ACTIVATED;
+        }
+
+        changeConfirmationCodeStateAndSave(confirmationCode, ACTIVATED, true);
         return ConfirmationCodeCheckResult.VALID;
     }
 
@@ -68,16 +76,18 @@ public class DelegatingPersistentConfirmationCodeManager implements Confirmation
 
     @Override
     public void deleteCode(ConfirmationCode code) {
-
+        if (code.getId() != null) {
+            confirmationCodeRepository.deleteById(code.getId());
+            return;
+        }
+        confirmationCodeRepository.deleteByCodeValue(code.getCode());
     }
 
     @Override
     public ConfirmationCode.LifecycleStage getLifecycleStage(ConfirmationCode code) {
-        code = confirmationCodeRepository.findConfirmationCodeByCodeValue(code.getCode()).orElse(null);
-        if (code == null) {
-            return null;
-        }
-        return code.getLifecycleStage();
+        return confirmationCodeRepository.findConfirmationCodeByCodeValue(code.getCode())
+                .map(ConfirmationCode::getLifecycleStage)
+                .orElse(null);
     }
 
     @Override

@@ -16,8 +16,9 @@ public class ConfirmationCodeCheckResult {
     private String description;
 
     public static final ConfirmationCodeCheckResult VALID = valid();
-    public static final ConfirmationCodeCheckResult ALREADY_EXPIRED = invalid("ALREADY_EXPIRED", "The code is already expired and no londer valid");
+    public static final ConfirmationCodeCheckResult ALREADY_EXPIRED = invalid("ALREADY_EXPIRED", "The code is already expired and no longer valid");
     public static final ConfirmationCodeCheckResult INVALID_CODE = invalid("INVALID_CODE", "The code does not exist");
+    public static final ConfirmationCodeCheckResult ALREADY_ACTIVATED = invalid("ALREADY_ACTIVATED", "The code is already activated.");
 
     public static ConfirmationCodeCheckResult valid() {
         return new ConfirmationCodeCheckResult(true);

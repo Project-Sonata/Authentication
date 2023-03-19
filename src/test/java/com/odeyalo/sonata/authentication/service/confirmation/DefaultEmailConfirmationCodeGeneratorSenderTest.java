@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.authentication.service.confirmation;
 
 import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
+import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.exceptions.MessageSendingFailedException;
 import com.odeyalo.sonata.authentication.service.confirmation.support.PlainTextConfirmationCodeEmailMessageCreator;
 import com.odeyalo.sonata.authentication.service.sender.MailMessage;
@@ -8,6 +9,7 @@ import com.odeyalo.sonata.authentication.testing.assertations.MailMessageAssert;
 import com.odeyalo.sonata.authentication.testing.factory.ConfirmationCodeEmailMessageCreatorTestingFactory;
 import com.odeyalo.sonata.authentication.testing.factory.EmailConfirmationCodeGeneratorSenderTestingFactory;
 import com.odeyalo.sonata.authentication.testing.faker.ConfirmationCodeFaker;
+import com.odeyalo.sonata.authentication.testing.faker.UserFaker;
 import com.odeyalo.sonata.authentication.testing.spy.MailSenderSpy;
 import com.odeyalo.sonata.authentication.testing.stubs.ConstructorBasedConfirmationCodeGeneratorStub;
 import com.odeyalo.sonata.authentication.testing.stubs.NullConfirmationCodeEmailMessageCreator;
@@ -31,7 +33,7 @@ class DefaultEmailConfirmationCodeGeneratorSenderTest {
         ConfirmationCode confirmationCode = ConfirmationCodeFaker.numeric().get();
         ConstructorBasedConfirmationCodeGeneratorStub generator = new ConstructorBasedConfirmationCodeGeneratorStub(confirmationCode);
         MailSenderSpy mailSenderSpy = new MailSenderSpy();
-
+        User user = UserFaker.create().get();
         PlainTextConfirmationCodeEmailMessageCreator creator = getMessageCreator(bodyFormat, subject);
 
         DefaultEmailConfirmationCodeGeneratorSender sender = EmailConfirmationCodeGeneratorSenderTestingFactory
@@ -43,7 +45,7 @@ class DefaultEmailConfirmationCodeGeneratorSenderTest {
 
         EmailReceiver receiver = EmailReceiver.of("odeyalo@gmail.com");
         // When
-        sender.generateAndSend(receiver);
+        sender.generateAndSend(user, receiver);
         // then
         MailMessage lastMessage = mailSenderSpy.getLast();
         MailMessageAssert.forMessage(lastMessage)
@@ -62,8 +64,9 @@ class DefaultEmailConfirmationCodeGeneratorSenderTest {
     @DisplayName("Provide null and expect IllegalArgumentException to be thrown")
     void provideNull_andExpectException() {
         DefaultEmailConfirmationCodeGeneratorSender sender = EmailConfirmationCodeGeneratorSenderTestingFactory.createDefaultImpl();
+        User user = UserFaker.create().get();
 
-        assertThatThrownBy(() -> sender.generateAndSend(null))
+        assertThatThrownBy(() -> sender.generateAndSend(user, null))
                 .describedAs("If null was provided as receiver, then IllegalArgumentException must be thrown")
                 .isExactlyInstanceOf(IllegalArgumentException.class);
     }
@@ -73,13 +76,14 @@ class DefaultEmailConfirmationCodeGeneratorSenderTest {
     void generatorReturnsNull_andExpectException() {
         // given
         ConstructorBasedConfirmationCodeGeneratorStub nullStub = new ConstructorBasedConfirmationCodeGeneratorStub(null);
+        User user = UserFaker.create().get();
         EmailReceiver receiver = EmailReceiver.of("odeyalo@gmail.com");
         DefaultEmailConfirmationCodeGeneratorSender generatorSender = EmailConfirmationCodeGeneratorSenderTestingFactory.createDefaultImplBuilder()
                 .overrideGenerator(nullStub)
                 .build();
         // then
         assertThatThrownBy(() -> {
-            generatorSender.generateAndSend(receiver);
+            generatorSender.generateAndSend(user, receiver);
         })
                 .describedAs("If ConfirmationCodeGenerator returns null, then nothing must be sent and MessageSendingFailedException must be thrown!")
                 .isExactlyInstanceOf(MessageSendingFailedException.class);
@@ -93,11 +97,11 @@ class DefaultEmailConfirmationCodeGeneratorSenderTest {
         DefaultEmailConfirmationCodeGeneratorSender sender = EmailConfirmationCodeGeneratorSenderTestingFactory.createDefaultImplBuilder()
                 .overrideBodyCreator(nullCreator)
                 .build();
-
+        User user = UserFaker.create().get();
         EmailReceiver receiver = EmailReceiver.of("odeyalo@gmail.com");
         // then
         assertThatThrownBy(() -> {
-            sender.generateAndSend(receiver);
+            sender.generateAndSend(user, receiver);
         })
                 .describedAs("If body is null, then MessageSendingFailedException must be returned")
                 .isExactlyInstanceOf(MessageSendingFailedException.class);

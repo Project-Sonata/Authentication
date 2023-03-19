@@ -22,7 +22,7 @@ public class ConfirmationCode {
     private Long id;
 
     @Column(name = "code", nullable = false, unique = true)
-    private String code;
+    private String codeValue;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -37,6 +37,14 @@ public class ConfirmationCode {
     @Enumerated(value = EnumType.STRING)
     @Builder.Default
     private LifecycleStage lifecycleStage = LifecycleStage.CREATED;
+
+    @JoinColumn(name = "user_id", nullable = false)
+    @OneToOne
+    private User user;
+
+    public String getCode() {
+        return codeValue;
+    }
 
     public boolean isExpired() {
         return expirationTime.isBefore(now());

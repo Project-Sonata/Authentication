@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.authentication.service.confirmation;
 
 import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
+import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.exceptions.MessageSendingFailedException;
 import com.odeyalo.sonata.authentication.service.confirmation.support.ConfirmationCodeEmailMessageCreator;
 import com.odeyalo.sonata.authentication.service.sender.MailMessage;
@@ -25,9 +26,9 @@ public class DefaultEmailConfirmationCodeGeneratorSender implements EmailConfirm
     }
 
     @Override
-    public void generateAndSend(EmailReceiver receiver) throws MessageSendingFailedException {
+    public void generateAndSend(User user, EmailReceiver receiver) throws MessageSendingFailedException {
         Assert.notNull(receiver, "Receiver must be not null!");
-        ConfirmationCode confirmationCode = confirmationCodeGenerator.generateCode();
+        ConfirmationCode confirmationCode = confirmationCodeGenerator.generateCode(user);
         if (confirmationCode == null) {
             this.logger.error("Null was returned as confirmation code, failed to send message to email!");
             throw new MessageSendingFailedException("Failed to send confirmation code since generator returns null");

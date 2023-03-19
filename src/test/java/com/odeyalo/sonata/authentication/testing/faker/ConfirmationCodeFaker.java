@@ -114,7 +114,7 @@ public class ConfirmationCodeFaker {
         ConfirmationCode confirmationCode = ConfirmationCode
                 .builder()
                 .id(id)
-                .code(codeValue)
+                .codeValue(codeValue)
                 .createdAt(createdAt)
                 .expirationTime(expiresIn)
                 .activated(activated)

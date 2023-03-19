@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.authentication.service.confirmation;
 
 import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
+import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.service.confirmation.support.ConfirmationCodeCheckResult;
 import com.odeyalo.sonata.authentication.service.confirmation.support.ConfirmationCodeLifecycleHandler;
 
@@ -25,7 +26,7 @@ public interface ConfirmationCodeManager extends ConfirmationCodeGenerator, Conf
      * @return - generated confirmation code
      */
     @Override
-    ConfirmationCode generateCode(int length, int lifetimeMinutes);
+    ConfirmationCode generateCode(User user, int length, int lifetimeMinutes);
 
     /**
      * Check if code is valid, if so, then ConfirmationCode will be activated and no longer valid.

@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.authentication.testing.spy;
 
+import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.service.confirmation.EmailConfirmationCodeGeneratorSender;
 import com.odeyalo.sonata.authentication.service.confirmation.EmailReceiver;
 import lombok.Getter;
@@ -17,7 +18,7 @@ public class EmptyEmailConfirmationCodeGeneratorSenderSpy implements EmailConfir
     private boolean wasSent = false;
 
     @Override
-    public void generateAndSend(EmailReceiver receiver) {
+    public void generateAndSend(User user, EmailReceiver receiver) {
         this.logger.debug("Sent the confirmation code to: {}", receiver);
         this.wasSent = true;
     }

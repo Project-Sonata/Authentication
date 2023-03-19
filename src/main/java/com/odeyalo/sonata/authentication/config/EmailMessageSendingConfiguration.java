@@ -1,7 +1,8 @@
 package com.odeyalo.sonata.authentication.config;
 
-import com.odeyalo.sonata.authentication.service.confirmation.EmailConfirmationCodeGeneratorSender;
-import com.odeyalo.sonata.authentication.service.confirmation.LoggingNullEmailConfirmationCodeGeneratorSender;
+import com.odeyalo.sonata.authentication.repository.ConfirmationCodeRepository;
+import com.odeyalo.sonata.authentication.service.confirmation.*;
+import com.odeyalo.sonata.authentication.service.confirmation.support.ConfirmationCodeEmailMessageCreator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,7 +10,18 @@ import org.springframework.context.annotation.Configuration;
 public class EmailMessageSendingConfiguration {
 
     @Bean
-    public EmailConfirmationCodeGeneratorSender emailConfirmationCodeGeneratorSender() {
-        return new LoggingNullEmailConfirmationCodeGeneratorSender();
+    public EmailConfirmationCodeGeneratorSender emailConfirmationCodeGeneratorSender(
+            ConfirmationCodeGenerator generator,
+            ConfirmationCodeEmailMessageCreator creator
+    ) {
+        return new DefaultEmailConfirmationCodeGeneratorSender(generator, creator,
+                (message) -> {
+                    System.out.println("Send to user: " + message);
+                });
+    }
+
+    @Bean
+    public ConfirmationCodeManager confirmationCodeManager(ConfirmationCodeRepository repository) {
+        return new DelegatingPersistentConfirmationCodeManager(new NumericConfirmationCodeGenerator(),repository);
     }
 }

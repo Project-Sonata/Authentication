@@ -1,7 +1,9 @@
 package com.odeyalo.sonata.authentication.service.confirmation;
 
 import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
+import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.testing.assertations.ConfirmationCodeAssert;
+import com.odeyalo.sonata.authentication.testing.faker.UserFaker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -18,8 +20,9 @@ class NumericConfirmationCodeGeneratorTest {
     void generateCode_andExpectSuccess() {
         // given
         NumericConfirmationCodeGenerator generator = new NumericConfirmationCodeGenerator();
+        User expectedUser = UserFaker.create().get();
         // When
-        ConfirmationCode confirmationCode = generator.generateCode(LENGTH, LIFETIME_MINUTES);
+        ConfirmationCode confirmationCode = generator.generateCode(expectedUser, LENGTH, LIFETIME_MINUTES);
         // Then
         ConfirmationCodeAssert.forCode(confirmationCode)
                 .isNotNull()
@@ -27,6 +30,7 @@ class NumericConfirmationCodeGeneratorTest {
                 .onlyDigits()
                 .shouldBeNotActivated()
                 .specificCodeValueLength(LENGTH)
-                .confirmationCodeLifetime(LIFETIME_MINUTES);
+                .confirmationCodeLifetime(LIFETIME_MINUTES)
+                .user(expectedUser);
     }
 }

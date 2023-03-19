@@ -8,9 +8,11 @@ import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
 import com.odeyalo.sonata.authentication.dto.response.TokensResponse;
 import com.odeyalo.sonata.authentication.dto.response.UserRegistrationConfirmationResponseDto;
 import com.odeyalo.sonata.authentication.entity.User;
+import com.odeyalo.sonata.authentication.repository.JpaConfirmationCodeRepository;
 import com.odeyalo.sonata.authentication.repository.JpaSupportUserRepository;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
 import com.odeyalo.sonata.authentication.testing.factory.UserEntityTestingFactory;
+import org.apache.commons.lang3.text.StrBuilder;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -43,6 +45,8 @@ class AuthControllerTest {
 
     @Autowired
     private JpaSupportUserRepository userRepository;
+    @Autowired
+    private JpaConfirmationCodeRepository confirmationCodeRepository;
 
     public static final String SIGNUP_ENDPOINT_NAME = "/auth/signup";
     public static final String EMAIL_CONFIRMATION_ENDPOINT_NAME = "/auth/confirm/email";
@@ -204,6 +208,7 @@ class AuthControllerTest {
 
         @AfterEach
         void clearDB() {
+            confirmationCodeRepository.deleteAll();
             userRepository.deleteAll();
         }
     }

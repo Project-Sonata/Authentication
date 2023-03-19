@@ -3,8 +3,10 @@ package com.odeyalo.sonata.authentication.service.confirmation.support;
 import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
 import com.odeyalo.sonata.authentication.service.confirmation.EmailReceiver;
 import com.odeyalo.sonata.authentication.service.sender.MailMessage;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+@Component
 public class PlainTextConfirmationCodeEmailMessageCreator implements ConfirmationCodeEmailMessageCreator {
     private String subject = "Confirmation code is here!";
     private String bodyFormat = "Your confirmation code is: %s";

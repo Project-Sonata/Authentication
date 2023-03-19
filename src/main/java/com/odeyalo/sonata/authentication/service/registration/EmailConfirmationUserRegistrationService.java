@@ -42,24 +42,24 @@ public class EmailConfirmationUserRegistrationService implements UserRegistratio
             return wrapper.result();
         }
 
-        return tryToSendOr(info, wrapper, (resultWrapper) -> {
+        return tryToSendOr(user, wrapper, (resultWrapper) -> {
             userRepository.deleteById(resultWrapper.user().getId());
         });
     }
 
-    private RegistrationResult tryToSendOr(UserRegistrationInfo info, ResultWrapper wrapper, Consumer<ResultWrapper> onError) {
+    private RegistrationResult tryToSendOr(User user, ResultWrapper wrapper, Consumer<ResultWrapper> onError) {
         try {
-            sendConfirmationCode(info);
+            sendConfirmationCode(user);
             return wrapper.result();
         } catch (MessageSendingFailedException ex) {
-            this.logger.error("Failed to send the confirmation code to: {}", info.getEmail());
+            this.logger.error("Failed to send the confirmation code to: {}", user.getEmail());
             onError.accept(wrapper);
             return RegistrationResult.failed(RegistrationResult.RequiredAction.DO_NOTHING, ErrorDetails.SERVER_ERROR);
         }
     }
 
-    private void sendConfirmationCode(UserRegistrationInfo info) throws MessageSendingFailedException {
-        confirmationCodeGeneratorSender.generateAndSend(EmailReceiver.of(info.getEmail()));
+    private void sendConfirmationCode(User user) throws MessageSendingFailedException {
+        confirmationCodeGeneratorSender.generateAndSend(user, EmailReceiver.of(user.getEmail()));
     }
 
     /**

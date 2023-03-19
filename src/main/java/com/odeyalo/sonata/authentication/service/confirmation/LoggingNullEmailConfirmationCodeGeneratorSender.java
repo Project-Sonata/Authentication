@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.authentication.service.confirmation;
 
+import com.odeyalo.sonata.authentication.entity.User;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +19,7 @@ public class LoggingNullEmailConfirmationCodeGeneratorSender implements EmailCon
     }
 
     @Override
-    public void generateAndSend(EmailReceiver receiver) {
+    public void generateAndSend(User user, EmailReceiver receiver) {
         this.logger.info("Sending to the email: {}", receiver);
     }
 }

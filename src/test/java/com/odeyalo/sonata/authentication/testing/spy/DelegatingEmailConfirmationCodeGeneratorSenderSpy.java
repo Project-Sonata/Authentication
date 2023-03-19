@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.authentication.testing.spy;
 
+import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.exceptions.MessageSendingFailedException;
 import com.odeyalo.sonata.authentication.service.confirmation.EmailConfirmationCodeGeneratorSender;
 import com.odeyalo.sonata.authentication.service.confirmation.EmailReceiver;
@@ -18,9 +19,9 @@ public class DelegatingEmailConfirmationCodeGeneratorSenderSpy implements EmailC
     }
 
     @Override
-    public void generateAndSend(EmailReceiver receiver) {
+    public void generateAndSend(User user, EmailReceiver receiver) {
         try {
-            delegate.generateAndSend(receiver);
+            delegate.generateAndSend(user, receiver);
             wasSent = true;
         } catch (MessageSendingFailedException e) {
             wasSent = false;

@@ -2,6 +2,7 @@ package com.odeyalo.sonata.authentication.service.confirmation;
 
 import com.odeyalo.sonata.authentication.common.ErrorDetails;
 import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
+import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.repository.InMemoryConfirmationCodeRepository;
 import com.odeyalo.sonata.authentication.repository.NullConfirmationCodeRepositoryStub;
 import com.odeyalo.sonata.authentication.service.confirmation.support.ConfirmationCodeCheckResult;
@@ -9,6 +10,7 @@ import com.odeyalo.sonata.authentication.testing.assertations.ConfirmationCodeAs
 import com.odeyalo.sonata.authentication.testing.factory.ConfirmationCodeManagerTestingFactory;
 import com.odeyalo.sonata.authentication.testing.factory.ConfirmationCodeRepositoryTestingFactory;
 import com.odeyalo.sonata.authentication.testing.faker.ConfirmationCodeFaker;
+import com.odeyalo.sonata.authentication.testing.faker.UserFaker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -64,17 +66,19 @@ class DelegatingPersistentConfirmationCodeManagerTest {
     @Test
     @DisplayName("Generate confirmation code and expect code to be valid and saved")
     void generateCode_andExpectCodeToBeGeneratedAndSaved() {
+        // given
         int length = 10;
         int lifetime = 10;
-        // given
+        User user = UserFaker.create().get();
         DelegatingPersistentConfirmationCodeManager persistentManager = ConfirmationCodeManagerTestingFactory.createPersistentManager();
         // when
-        ConfirmationCode generatedCode = persistentManager.generateCode(length, lifetime);
+        ConfirmationCode generatedCode = persistentManager.generateCode(user, length, lifetime);
         // then
         ConfirmationCodeAssert.forCode(generatedCode)
                 .compareCreatedAndExpirationTime()
                 .specificCodeValueLength(length)
                 .confirmationCodeLifetime(lifetime)
+                .user(user)
                 .shouldBeNotActivated();
 
         Optional<ConfirmationCode> savedCode = persistentManager.findByCodeValue(generatedCode.getCode());
@@ -307,9 +311,10 @@ class DelegatingPersistentConfirmationCodeManagerTest {
     @DisplayName("Get lifecycle stage of the code and expect stage to be CREATED")
     void getLifecycleStageForNewCode_andExpectStageToBeCreated() {
         // given
+        User user = UserFaker.create().get();
         DelegatingPersistentConfirmationCodeManager persistentConfirmationCodeManager = ConfirmationCodeManagerTestingFactory.createPersistentManager();
         // when
-        ConfirmationCode newCode = persistentConfirmationCodeManager.generateCode();
+        ConfirmationCode newCode = persistentConfirmationCodeManager.generateCode(user);
         ConfirmationCode.LifecycleStage actualLifecycleStage = persistentConfirmationCodeManager.getLifecycleStage(newCode);
         // then
         assertThat(actualLifecycleStage)
@@ -321,9 +326,10 @@ class DelegatingPersistentConfirmationCodeManagerTest {
     @DisplayName("Get lifecycle stage for activated code and expect LifecycleStage.ACTIVATED")
     void getStageForActivatedCode_andExpectStageToBeActivated() {
         // given
+        User user = UserFaker.create().get();
         DelegatingPersistentConfirmationCodeManager persistentConfirmationCodeManager = ConfirmationCodeManagerTestingFactory.createPersistentManager();
         // when
-        ConfirmationCode newCode = persistentConfirmationCodeManager.generateCode();
+        ConfirmationCode newCode = persistentConfirmationCodeManager.generateCode(user);
         // Activate the existing code to change lifecycle stage and check if the stage has been changed
         persistentConfirmationCodeManager.verifyCodeAndActive(newCode.getCode());
         ConfirmationCode.LifecycleStage actualLifecycleStage = persistentConfirmationCodeManager.getLifecycleStage(newCode);
@@ -372,9 +378,10 @@ class DelegatingPersistentConfirmationCodeManagerTest {
     @DisplayName("Get lifecycle stage of the code by code value and expect stage to be CREATED")
     void getLifecycleStageByCodeValue_andExpectStageToBeCreated() {
         // given
+        User user = UserFaker.create().get();
         DelegatingPersistentConfirmationCodeManager persistentConfirmationCodeManager = ConfirmationCodeManagerTestingFactory.createPersistentManager();
         // when
-        ConfirmationCode newCode = persistentConfirmationCodeManager.generateCode();
+        ConfirmationCode newCode = persistentConfirmationCodeManager.generateCode(user);
         ConfirmationCode.LifecycleStage actualLifecycleStage = persistentConfirmationCodeManager.getLifecycleStage(newCode.getCode());
         // then
         assertThat(actualLifecycleStage)
@@ -387,9 +394,10 @@ class DelegatingPersistentConfirmationCodeManagerTest {
     @DisplayName("Get lifecycle stage for activated code by code value and expect LifecycleStage.ACTIVATED")
     void getStageForActivatedCodeByCodeValue_andExpectStageToBeActivated() {
         // given
+        User user = UserFaker.create().get();
         DelegatingPersistentConfirmationCodeManager persistentConfirmationCodeManager = ConfirmationCodeManagerTestingFactory.createPersistentManager();
         // when
-        ConfirmationCode newCode = persistentConfirmationCodeManager.generateCode();
+        ConfirmationCode newCode = persistentConfirmationCodeManager.generateCode(user);
         // Activate the existing code to change lifecycle stage and check if the stage has been changed
         persistentConfirmationCodeManager.verifyCodeAndActive(newCode.getCode());
         ConfirmationCode.LifecycleStage actualLifecycleStage = persistentConfirmationCodeManager.getLifecycleStage(newCode.getCode());

@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.authentication.service.confirmation;
 
 import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
+import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.repository.ConfirmationCodeRepository;
 import com.odeyalo.sonata.authentication.service.confirmation.support.ConfirmationCodeCheckResult;
 import org.slf4j.Logger;
@@ -39,8 +40,8 @@ public class DelegatingPersistentConfirmationCodeManager implements Confirmation
     }
 
     @Override
-    public ConfirmationCode generateCode(int length, int lifetimeMinutes) {
-        ConfirmationCode generatedCode = delegateGenerator.generateCode(length, lifetimeMinutes);
+    public ConfirmationCode generateCode(User user, int length, int lifetimeMinutes) {
+        ConfirmationCode generatedCode = delegateGenerator.generateCode(user, length, lifetimeMinutes);
         ConfirmationCode savedCode = confirmationCodeRepository.save(generatedCode);
         logger.info("Generated and saved the code: {}", savedCode);
         return savedCode;

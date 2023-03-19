@@ -20,7 +20,7 @@ public class NumericConfirmationCodeGenerator implements ConfirmationCodeGenerat
                 .builder()
                 .createdAt(createdAt)
                 .expirationTime(createdAt.plusMinutes(lifetimeMinutes))
-                .code(codeValue)
+                .codeValue(codeValue)
                 .user(user)
                 .build();
     }

@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.authentication.testing.assertations;
 
 import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
+import com.odeyalo.sonata.authentication.entity.User;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.assertj.core.api.AbstractAssert;
@@ -107,6 +108,13 @@ public class ConfirmationCodeAssert extends AbstractAssert<ConfirmationCodeAsser
         ConfirmationCode.LifecycleStage actualStage = confirmationCode.getLifecycleStage();
         if (actualStage != requiredStage) {
             failWithMessage("Wrong confirmation code lifecycle stage. Required: %s, actual: %s", requiredStage, actualStage);
+        }
+        return this;
+    }
+
+    public ConfirmationCodeAssert user(User user) {
+        if ((confirmationCode.getUser() == null || !confirmationCode.getUser().equals(user))) {
+            failWithMessage("User's entities are not equal! Required: <%s> but was: <%s>", user, confirmationCode.getUser());
         }
         return this;
     }

@@ -1,21 +1,20 @@
 package com.odeyalo.sonata.authentication.controller;
 
+import com.odeyalo.sonata.authentication.dto.UserInfo;
 import com.odeyalo.sonata.authentication.dto.error.ApiErrorDetailsInfo;
+import com.odeyalo.sonata.authentication.dto.request.ConfirmationCodeRequestDto;
 import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.dto.response.EmailConfirmationStatusResponseDto;
 import com.odeyalo.sonata.authentication.dto.response.TokensResponse;
 import com.odeyalo.sonata.authentication.dto.response.UserRegistrationConfirmationResponseDto;
 import com.odeyalo.sonata.authentication.service.registration.RegistrationResult;
 import com.odeyalo.sonata.authentication.service.registration.UserRegistrationManager;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -39,17 +38,22 @@ public class AuthController {
         }
         return getSuccessResponse(info, dto);
     }
-
+    // user confirmed email -> token and refresh token must be returned
+    // controller -> email confirmation manager.verify
     @PostMapping(value = "/confirm/email", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> confirmEmail() {
-        TokensResponse.Token accessToken = new TokensResponse.Token("access_token_value", 3600);
-        TokensResponse.Token refreshTokenToken = new TokensResponse.Token("refresh_token_value", 10000);
-        TokensResponse body = new TokensResponse(HttpStatus.OK, new TokensResponse.Tokens(accessToken, refreshTokenToken));
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(body);
+    public ResponseEntity<?> confirmEmail(@RequestBody ConfirmationCodeRequestDto codeDto) {
+        EmailConfirmationStatusResponseDto dto = EmailConfirmationStatusResponseDto.confirmationSuccess(
+                new UserInfo("1", "odeyalo@gmail.com", "user")
+        );
+
+//        TokensResponse.Token accessToken = new TokensResponse.Token("access_token_value", 3600);
+//        TokensResponse.Token refreshTokenToken = new TokensResponse.Token("refresh_token_value", 10000);
+//        TokensResponse body = new TokensResponse(HttpStatus.OK, new TokensResponse.Tokens(accessToken, refreshTokenToken));
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(dto);
     }
     //todo
     private ResponseEntity<UserRegistrationConfirmationResponseDto> getSuccessResponse(UserRegistrationInfo info, UserRegistrationConfirmationResponseDto dto) {
-        Link link = linkTo(methodOn(AuthController.class).confirmEmail()).withRel("confirmation_url");
+        Link link = linkTo(methodOn(AuthController.class).confirmEmail(null)).withRel("confirmation_url");
         Link selfRel = getSelfRel(info);
 
         dto.add(link);

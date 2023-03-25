@@ -7,14 +7,21 @@ import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
 import com.odeyalo.sonata.authentication.dto.response.EmailConfirmationStatusResponseDto;
 import com.odeyalo.sonata.authentication.dto.response.TokensResponse;
 import com.odeyalo.sonata.authentication.dto.response.UserRegistrationConfirmationResponseDto;
+import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
+import com.odeyalo.sonata.authentication.repository.ConfirmationCodeRepository;
+import com.odeyalo.sonata.authentication.service.confirmation.EmailConfirmationManager;
+import com.odeyalo.sonata.authentication.service.confirmation.support.ConfirmationCodeCheckResult;
 import com.odeyalo.sonata.authentication.service.registration.RegistrationResult;
 import com.odeyalo.sonata.authentication.service.registration.UserRegistrationManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -23,9 +30,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/auth")
 public class AuthController {
     private final UserRegistrationManager userRegistrationManager;
+    private final EmailConfirmationManager manager;
 
-    public AuthController(UserRegistrationManager userRegistrationManager) {
+    @Autowired
+    public AuthController(UserRegistrationManager userRegistrationManager, EmailConfirmationManager manager) {
         this.userRegistrationManager = userRegistrationManager;
+        this.manager = manager;
     }
 
     @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -42,8 +52,14 @@ public class AuthController {
     // controller -> email confirmation manager.verify
     @PostMapping(value = "/confirm/email", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> confirmEmail(@RequestBody ConfirmationCodeRequestDto codeDto) {
+        ConfirmationCodeCheckResult result = manager.verifyCode(codeDto.getCodeValue());
+
+        if (!result.isValid()) {
+            EmailConfirmationStatusResponseDto dto = EmailConfirmationStatusResponseDto.confirmationFailed("The code is invalid");
+            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(dto);
+        }
         EmailConfirmationStatusResponseDto dto = EmailConfirmationStatusResponseDto.confirmationSuccess(
-                new UserInfo("1", "odeyalo@gmail.com", "user")
+                UserInfo.from(result.getUser())
         );
 
 //        TokensResponse.Token accessToken = new TokensResponse.Token("access_token_value", 3600);

@@ -2,21 +2,26 @@ package com.odeyalo.sonata.authentication.controller;
 
 import com.odeyalo.sonata.authentication.JsonTestUtils;
 import com.odeyalo.sonata.authentication.common.ErrorDetails;
+import com.odeyalo.sonata.authentication.dto.UserInfo;
 import com.odeyalo.sonata.authentication.dto.error.ApiErrorDetailsInfo;
 import com.odeyalo.sonata.authentication.dto.request.ConfirmationCodeData;
 import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
-import com.odeyalo.sonata.authentication.dto.response.TokensResponse;
+import com.odeyalo.sonata.authentication.dto.response.EmailConfirmationStatusResponseDto;
 import com.odeyalo.sonata.authentication.dto.response.UserRegistrationConfirmationResponseDto;
+import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
 import com.odeyalo.sonata.authentication.entity.User;
+import com.odeyalo.sonata.authentication.repository.ConfirmationCodeRepository;
 import com.odeyalo.sonata.authentication.repository.JpaConfirmationCodeRepository;
 import com.odeyalo.sonata.authentication.repository.JpaSupportUserRepository;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
 import com.odeyalo.sonata.authentication.testing.factory.UserEntityTestingFactory;
-import org.apache.commons.lang3.text.StrBuilder;
+import com.odeyalo.sonata.authentication.testing.faker.ConfirmationCodeFaker;
+import com.odeyalo.sonata.authentication.testing.faker.UserFaker;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,6 +32,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -205,23 +211,26 @@ class AuthControllerTest {
             assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
             assertEquals(ErrorDetails.INVALID_PASSWORD, errorInfo.getErrorDetails(), "If the password is incorrect, then invalid_password error must be returned");
         }
-
-        @AfterEach
-        void clearDB() {
-            confirmationCodeRepository.deleteAll();
-            userRepository.deleteAll();
-        }
     }
 
     @Nested
     class EmailConfirmationEndpointsAuthControllerTests {
 
         @Test
-        @DisplayName("Send valid email confirmation code and expect HTTP 200 OK with JSON body that contains access and refresh tokens")
-        void sendValidCode_andExpectOKWithTokens() throws Exception {
-            ConfirmationCodeData data = new ConfirmationCodeData("123456");
-            String json = JsonTestUtils.convertToJson(data);
+        @DisplayName("Send valid email confirmation code and expect HTTP 200 OK with JSON body that contains info about user and authentication")
+        void sendValidCode_andExpectOKWithBody() throws Exception {
+            // given
+            String validCodeValue = "123456";
+            User user = ((UserRepository) userRepository).save(UserFaker.create().overrideId(null).makeInactive().get());
 
+            ConfirmationCode confirmationCode = ConfirmationCodeFaker.withBody(validCodeValue).user(user).get();
+            ((ConfirmationCodeRepository) confirmationCodeRepository).save(confirmationCode);
+
+            UserInfo expectedUserInfo = UserInfo.from(user);
+
+            ConfirmationCodeData data = new ConfirmationCodeData(validCodeValue);
+            String json = JsonTestUtils.convertToJson(data);
+            // when
             MvcResult mvcResult = mockMvc.perform(
                             post(EMAIL_CONFIRMATION_ENDPOINT_NAME)
                                     .contentType(MediaType.APPLICATION_JSON)
@@ -230,26 +239,50 @@ class AuthControllerTest {
                     .andExpect(MockMvcResultMatchers.status().isOk())
                     .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                     .andReturn();
+            // then
+            Optional<User> optional = ((UserRepository) userRepository).findById(user.getId());
+            EmailConfirmationStatusResponseDto responseDto = JsonTestUtils.convertToPojo(mvcResult, EmailConfirmationStatusResponseDto.class);
+            UserInfo userInfo = responseDto.getUserInfo();
 
-            TokensResponse tokensResponse = JsonTestUtils.convertToPojo(mvcResult, TokensResponse.class);
-
-            TokensResponse.Tokens tokens = tokensResponse.getTokens();
-
-            assertNotNull(tokens, "Response MUST NOT BE NULL and contain access and refresh tokens");
-
-            TokensResponse.Token accessToken = tokens.getAccessToken();
-            TokensResponse.Token refreshToken = tokens.getRefreshToken();
-
-            assertNotNull(accessToken, "Access token must be presented in response!");
-            assertNotNull(refreshToken, "Refresh token must be presented in response!");
-
-            assertNotNull(accessToken.getBody(), "Body of the access token must be not null and must contain token!");
-            assertNotNull(accessToken.getBody(), "Body of the refresh token must be not null and must contain token!");
-
-            assertTrue(accessToken.getExpiresIn() > 0, "Access token expire time must be greater than 0!");
-            assertTrue(refreshToken.getExpiresIn() > 0, "Refresh token expire time must be greater than 0!");
-            assertTrue(refreshToken.getExpiresIn() > accessToken.getExpiresIn(), "The expire time of the refresh token must be greater than the expire time of the access token");
+            assertTrue(optional.isPresent(), "User must not be deleted after request!");
+            User actualUser = optional.get();
+            assertTrue(actualUser.isActive(), "The user must be activated if code was valid!");
+            assertTrue(responseDto.isConfirmed(), "If the code is valid, then true must be returned in is_confirmed field");
+            assertEquals(expectedUserInfo, userInfo, "The user info must be same to the info from ConfirmationCode");
+            assertNotNull(responseDto.getMessage(), "Message should not be null");
         }
+
+        @Test
+        @DisplayName("Send invalid email confirmation code and expect HTTP 400 with JSON body")
+        void sendInValidCode_andExpectBadRequest() throws Exception {
+            // given
+            String invalidCodeValue = "123456";
+            ConfirmationCodeData data = new ConfirmationCodeData(invalidCodeValue);
+            String json = JsonTestUtils.convertToJson(data);
+            // when
+            MvcResult mvcResult = mockMvc.perform(
+                            post(EMAIL_CONFIRMATION_ENDPOINT_NAME)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(json))
+                    .andDo(print())
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                    .andReturn();
+            // then
+            EmailConfirmationStatusResponseDto responseDto = JsonTestUtils.convertToPojo(mvcResult, EmailConfirmationStatusResponseDto.class);
+            UserInfo userInfo = responseDto.getUserInfo();
+
+            assertFalse(responseDto.isConfirmed(), "If the code is invalid, then false must be returned in is_confirmed field");
+            assertNotNull(responseDto.getMessage(), "Message should not be null");
+            assertNull(userInfo, "User info must be null if the confirmation code is invalid");
+        }
+    }
+
+
+    @AfterEach
+    void clearDB() {
+        confirmationCodeRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     private UserRegistrationInfo getValidUserRegistrationInfo() {

@@ -50,6 +50,7 @@ public class DelegatingPersistentConfirmationCodeManager implements Confirmation
     @Override
     public ConfirmationCodeCheckResult verifyCodeAndActive(String codeValue) {
         Optional<ConfirmationCode> optional = confirmationCodeRepository.findConfirmationCodeByCodeValue(codeValue);
+
         if (optional.isEmpty()) {
             return ConfirmationCodeCheckResult.INVALID_CODE;
         }
@@ -64,9 +65,11 @@ public class DelegatingPersistentConfirmationCodeManager implements Confirmation
         if ((lifecycleStage == ACTIVATED) || (lifecycleStage == DENIED)) {
             return ConfirmationCodeCheckResult.ALREADY_ACTIVATED;
         }
+        User user = confirmationCode.getUser();
 
         changeConfirmationCodeStateAndSave(confirmationCode, ACTIVATED, true);
-        return ConfirmationCodeCheckResult.VALID;
+
+        return ConfirmationCodeCheckResult.valid(user);
     }
 
     @Override

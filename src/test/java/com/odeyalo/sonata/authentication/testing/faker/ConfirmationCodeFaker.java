@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.authentication.testing.faker;
 
 import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
+import com.odeyalo.sonata.authentication.entity.User;
 import lombok.ToString;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -20,6 +21,7 @@ public class ConfirmationCodeFaker {
     private LocalDateTime expiresIn;
     private boolean activated;
     private ConfirmationCode.LifecycleStage lifecycleStage;
+    private User user;
 
     @ToString.Exclude
     private final Logger logger = LoggerFactory.getLogger(ConfirmationCodeFaker.class);
@@ -31,15 +33,19 @@ public class ConfirmationCodeFaker {
         this.lifecycleStage = lifecycleStage;
         this.createdAt = LocalDateTime.now();
         this.expiresIn = createdAt.plusMinutes(10);
+        this.user = UserFaker.create().get();
     }
 
-    public ConfirmationCodeFaker(Long id, String codeValue, LocalDateTime createdAt, LocalDateTime expiresIn, boolean activated, ConfirmationCode.LifecycleStage lifecycleStage) {
+    public ConfirmationCodeFaker(Long id, String codeValue, LocalDateTime createdAt, LocalDateTime expiresIn, boolean activated,
+                                 ConfirmationCode.LifecycleStage lifecycleStage,
+                                 User user) {
         this.id = id;
         this.codeValue = codeValue;
         this.createdAt = createdAt;
         this.expiresIn = expiresIn;
         this.activated = activated;
         this.lifecycleStage = lifecycleStage;
+        this.user = user;
     }
 
     public static ConfirmationCodeFaker withBody(String body) {
@@ -66,7 +72,8 @@ public class ConfirmationCodeFaker {
         String body = RandomStringUtils.randomNumeric(8);
         LocalDateTime createdAt = LocalDateTime.of(2022, 3, 20, 13, 30);
         LocalDateTime expiresIn = LocalDateTime.of(2022, 3, 20, 13, 40);
-        return new ConfirmationCodeFaker(RandomUtils.nextLong(), body, createdAt, expiresIn, false, ConfirmationCode.LifecycleStage.CREATED);
+        User user = UserFaker.create().get();
+        return new ConfirmationCodeFaker(RandomUtils.nextLong(), body, createdAt, expiresIn, false, ConfirmationCode.LifecycleStage.CREATED, user);
     }
 
     public ConfirmationCodeFaker nullId() {
@@ -110,6 +117,11 @@ public class ConfirmationCodeFaker {
         return this;
     }
 
+    public ConfirmationCodeFaker user(User user) {
+        this.user = user;
+        return this;
+    }
+
     public ConfirmationCode get() {
         ConfirmationCode confirmationCode = ConfirmationCode
                 .builder()
@@ -119,6 +131,7 @@ public class ConfirmationCodeFaker {
                 .expirationTime(expiresIn)
                 .activated(activated)
                 .lifecycleStage(lifecycleStage)
+                .user(user)
                 .build();
         this.logger.debug("Created fake confirmation code: {}", confirmationCode);
         return confirmationCode;

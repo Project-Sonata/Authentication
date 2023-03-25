@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.NaturalId;
 
+import java.util.UUID;
+
 /**
  * Entity class to store the data about end-user
  */
@@ -36,5 +38,13 @@ public class User {
         this.email = email;
         this.password = password;
         this.active = active;
+    }
+
+
+    @PrePersist
+    public void generateNaturalId() {
+        if (naturalId == null) {
+            naturalId = UUID.randomUUID().toString();
+        }
     }
 }

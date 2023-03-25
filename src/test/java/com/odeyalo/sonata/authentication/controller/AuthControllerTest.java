@@ -32,6 +32,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -220,7 +221,7 @@ class AuthControllerTest {
         void sendValidCode_andExpectOKWithBody() throws Exception {
             // given
             String validCodeValue = "123456";
-            User user = ((UserRepository) userRepository).save(UserFaker.create().overrideId(null).get());
+            User user = ((UserRepository) userRepository).save(UserFaker.create().overrideId(null).makeInactive().get());
 
             ConfirmationCode confirmationCode = ConfirmationCodeFaker.withBody(validCodeValue).user(user).get();
             ((ConfirmationCodeRepository) confirmationCodeRepository).save(confirmationCode);
@@ -239,9 +240,13 @@ class AuthControllerTest {
                     .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                     .andReturn();
             // then
+            Optional<User> optional = ((UserRepository) userRepository).findById(user.getId());
             EmailConfirmationStatusResponseDto responseDto = JsonTestUtils.convertToPojo(mvcResult, EmailConfirmationStatusResponseDto.class);
             UserInfo userInfo = responseDto.getUserInfo();
 
+            assertTrue(optional.isPresent(), "User must not be deleted after request!");
+            User actualUser = optional.get();
+            assertTrue(actualUser.isActive(), "The user must be activated if code was valid!");
             assertTrue(responseDto.isConfirmed(), "If the code is valid, then true must be returned in is_confirmed field");
             assertEquals(expectedUserInfo, userInfo, "The user info must be same to the info from ConfirmationCode");
             assertNotNull(responseDto.getMessage(), "Message should not be null");

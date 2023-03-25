@@ -59,14 +59,11 @@ public class AuthController {
             return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(dto);
         }
         EmailConfirmationStatusResponseDto dto = EmailConfirmationStatusResponseDto.confirmationSuccess(
-                UserInfo.from(result.getUser())
-        );
+                UserInfo.from(result.getUser()));
 
-//        TokensResponse.Token accessToken = new TokensResponse.Token("access_token_value", 3600);
-//        TokensResponse.Token refreshTokenToken = new TokensResponse.Token("refresh_token_value", 10000);
-//        TokensResponse body = new TokensResponse(HttpStatus.OK, new TokensResponse.Tokens(accessToken, refreshTokenToken));
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(dto);
     }
+
     //todo
     private ResponseEntity<UserRegistrationConfirmationResponseDto> getSuccessResponse(UserRegistrationInfo info, UserRegistrationConfirmationResponseDto dto) {
         Link link = linkTo(methodOn(AuthController.class).confirmEmail(null)).withRel("confirmation_url");

@@ -3,6 +3,8 @@ package com.odeyalo.sonata.authentication.service.confirmation;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.exceptions.MessageSendingFailedException;
 import com.odeyalo.sonata.authentication.service.confirmation.support.ConfirmationCodeCheckResult;
+import com.odeyalo.sonata.authentication.service.registration.support.UserActivator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,10 +16,13 @@ import org.springframework.stereotype.Service;
 public class DelegatingEmailConfirmationManager implements EmailConfirmationManager {
     private final ConfirmationCodeManager manager;
     private final EmailConfirmationCodeGeneratorSender generatorSender;
+    private final UserActivator userActivator;
 
-    public DelegatingEmailConfirmationManager(ConfirmationCodeManager manager, EmailConfirmationCodeGeneratorSender generatorSender) {
+    @Autowired
+    public DelegatingEmailConfirmationManager(ConfirmationCodeManager manager, EmailConfirmationCodeGeneratorSender generatorSender, UserActivator userActivator) {
         this.manager = manager;
         this.generatorSender = generatorSender;
+        this.userActivator = userActivator;
     }
 
     @Override
@@ -27,11 +32,17 @@ public class DelegatingEmailConfirmationManager implements EmailConfirmationMana
 
     @Override
     public void resendConfirmationCode(User user, EmailReceiver receiver) throws MessageSendingFailedException {
-        this.generatorSender.generateAndSend(user, receiver);
+        generatorSender.generateAndSend(user, receiver);
     }
 
     @Override
     public ConfirmationCodeCheckResult verifyCode(String codeValue) {
-        return manager.verifyCodeAndActive(codeValue);
+        ConfirmationCodeCheckResult result = manager.verifyCodeAndActive(codeValue);
+
+        if (result.isValid()) {
+            userActivator.activateUser(result.getUser());
+        }
+
+        return result;
     }
 }

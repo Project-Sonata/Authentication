@@ -4,6 +4,7 @@ import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.service.confirmation.support.ConfirmationCodeCheckResult;
 import com.odeyalo.sonata.authentication.service.confirmation.support.ConfirmationCodeLifecycleHandler;
+import com.odeyalo.sonata.authentication.service.confirmation.support.ConfirmationCodeActivator;
 
 import java.util.Optional;
 
@@ -11,7 +12,7 @@ import java.util.Optional;
  * An extension for {@link ConfirmationCodeGenerator} that add support to manage confirmation code lifecycle.
  * Add capabilities to generate and save, delete, activate a confirmation code
  */
-public interface ConfirmationCodeManager extends ConfirmationCodeGenerator, ConfirmationCodeLifecycleHandler {
+public interface ConfirmationCodeManager extends ConfirmationCodeGenerator, ConfirmationCodeLifecycleHandler, ConfirmationCodeActivator {
     /**
      * Find and return the confirmation code by value
      * @param codeValue - confirmation code value that will be used to find the confirmation code
@@ -33,6 +34,7 @@ public interface ConfirmationCodeManager extends ConfirmationCodeGenerator, Conf
      * @param codeValue - code value to check
      * @return - {@link ConfirmationCodeCheckResult} that contains info if code is valid or not. Contains error description about what's wrong with the provided code.
      */
+    @Override
     ConfirmationCodeCheckResult verifyCodeAndActive(String codeValue);
 
     /**

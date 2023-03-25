@@ -3,7 +3,7 @@ package com.odeyalo.sonata.authentication.service.confirmation.support;
 /**
  * Responsible for validation and activation the ConfirmationCode, if valid
  */
-public interface ConfirmationCodeValidator {
+public interface ConfirmationCodeActivator {
     /**
      * Check if code is valid, if so, then ConfirmationCode will be activated and no longer valid.
      * @param codeValue - code value to check

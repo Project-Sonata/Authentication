@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.odeyalo.sonata.authentication.dto.UserInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Dto to return an answer about email confirmation status
@@ -21,6 +22,12 @@ public class EmailConfirmationStatusResponseDto {
     private final UserInfo userInfo;
     @JsonProperty("message")
     private final String message;
+
+    public EmailConfirmationStatusResponseDto() {
+        this.isConfirmed = false;
+        this.userInfo = null;
+        this.message = null;
+    }
 
     public static final String SUCCESS_MESSAGE = "The email has been successfully confirmed";
 

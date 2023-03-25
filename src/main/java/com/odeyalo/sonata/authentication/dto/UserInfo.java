@@ -16,9 +16,8 @@ import lombok.NoArgsConstructor;
 public class UserInfo {
     private String id;
     private String email;
-    private String role;
 
     public static UserInfo from(User user) {
-        return new UserInfo(String.valueOf(user.getId()), user.getEmail(), "user");
+        return new UserInfo(String.valueOf(user.getId()), user.getEmail());
     }
 }

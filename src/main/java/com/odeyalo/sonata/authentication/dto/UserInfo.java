@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.authentication.dto;
 
+import com.odeyalo.sonata.authentication.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,4 +17,8 @@ public class UserInfo {
     private String id;
     private String email;
     private String role;
+
+    public static UserInfo from(User user) {
+        return new UserInfo(String.valueOf(user.getId()), user.getEmail(), "user");
+    }
 }

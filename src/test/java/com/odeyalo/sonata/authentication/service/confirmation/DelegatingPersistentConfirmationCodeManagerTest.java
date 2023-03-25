@@ -1,6 +1,5 @@
 package com.odeyalo.sonata.authentication.service.confirmation;
 
-import com.odeyalo.sonata.authentication.common.ErrorDetails;
 import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.repository.InMemoryConfirmationCodeRepository;
@@ -106,6 +105,11 @@ class DelegatingPersistentConfirmationCodeManagerTest {
         assertThat(result.isValid())
                 .as("if code is exists in manager, then this code must be activated!")
                 .isTrue();
+
+        assertThat(result.getUser())
+                .as("User must be returned if code is valid!")
+                .isEqualTo(confirmationCode.getUser());
+
         Optional<ConfirmationCode> activatedCode = persistentManager.findByCodeValue(confirmationCode.getCode());
 
         assertThat(activatedCode)

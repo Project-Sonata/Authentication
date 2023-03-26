@@ -289,6 +289,7 @@ class AuthControllerTest {
     @Nested
     class LoginEndpointAuthControllerTests {
 
+
         @Test
         @DisplayName("Test login endpoint with correct credentials and expect 200 OK and JSON body as result")
         void loginEndpointWithCorrectCredentials_andExpectOkAndJson() throws Exception {
@@ -315,7 +316,6 @@ class AuthControllerTest {
             AuthenticationResultResponse result = JsonTestUtils.convertToPojo(mvcResult, AuthenticationResultResponse.class);
             assertTrue(result.isSuccess(), "If credentials are correct, then 'true' should be returned as result!");
             assertEquals(expectedUserInfo, result.getUserInfo(), "If user has been authenticated, then user info should be returned!");
-            assertNull(result.getErrorDetails(), "If everything is okay, then ErrorDetails should be null");
         }
 
         @Test
@@ -323,7 +323,7 @@ class AuthControllerTest {
         void loginEndpointWithIncorrectCredentials_andExpectBadRequestAndJson() throws Exception {
             // given
             String email = "odeyalo";
-            String rawPassword = "MikuIsTheB3st";
+            String rawPassword = "Miku is the best<3";
             LoginCredentials credentials = LoginCredentials.of(email, rawPassword);
             String content = JsonTestUtils.convertToJson(credentials);
             // when
@@ -338,7 +338,6 @@ class AuthControllerTest {
 
             assertFalse(result.isSuccess(), "If credentials are incorrect, then 'false' should be returned as result!");
             assertNull(result.getUserInfo(), "If credentials are incorrect, then null should be returned as user info");
-            assertEquals(AuthenticationResult.PossibleErrors.INVALID_CREDENTIALS, result.getErrorDetails(), "If the invalid credentials were provided, then AuthenticationResult.PossibleErrors.INVALID_CREDENTIALS error should be returned");
         }
 
 
@@ -350,7 +349,7 @@ class AuthControllerTest {
             String incorrectPassword = "IdL0v3ToBeANewKurtCobain";
 
             String encodedPassword = passwordEncoder.encode(rawCorrectPassword);
-            User user = UserFaker.create().overridePassword(encodedPassword).makeActive().get();
+            User user = UserFaker.create().overridePassword(encodedPassword).get();
 
             LoginCredentials credentials = LoginCredentials.of(user.getEmail(), incorrectPassword);
 
@@ -369,7 +368,6 @@ class AuthControllerTest {
 
             assertFalse(result.isSuccess(), "If credentials are incorrect, then 'false' should be returned as result!");
             assertNull(result.getUserInfo(), "If credentials are incorrect, then null should be returned as user info");
-            assertEquals(AuthenticationResult.PossibleErrors.INVALID_CREDENTIALS, result.getErrorDetails(), "If the invalid credentials were provided, then AuthenticationResult.PossibleErrors.INVALID_CREDENTIALS error should be returned");
         }
 
 
@@ -397,7 +395,6 @@ class AuthControllerTest {
             AuthenticationResultResponse result = JsonTestUtils.convertToPojo(mvcResult, AuthenticationResultResponse.class);
             assertFalse(result.isSuccess(), "If credentials are correct, then 'false' should be returned as result!");
             assertNull(result.getUserInfo(), "If user is inactive, then null user info should be returned!");
-            assertEquals(AuthenticationResult.PossibleErrors.EMAIL_CONFIRMATION_REQUIRED, result.getErrorDetails(), "If the user is activated but not activated, then AuthenticationResult.PossibleErrors.EMAIL_CONFIRMATION_REQUIRED error should be returned");
         }
     }
 

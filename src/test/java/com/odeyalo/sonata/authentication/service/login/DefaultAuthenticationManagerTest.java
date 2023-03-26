@@ -43,6 +43,10 @@ class DefaultAuthenticationManagerTest {
                 .as("The user which was authenticated should be properly returned!")
                 .isEqualTo(result.getUser());
 
+        assertThat(result.getErrorDetails())
+                .as("If user has been successfully authenticated, then ErrorDetails must be null")
+                .isNull();
+
     }
 
     @Test
@@ -50,7 +54,7 @@ class DefaultAuthenticationManagerTest {
     void authenticateExistingUserWithWrongPassword_andExpectFailed() {
         // given
         String wrongPassword = "AyanakodjiKiotaka666";
-        User user = UserFaker.create().get();
+        User user = UserFaker.create().makeActive().get();
 
         LoginCredentials incorrectCredentials = LoginCredentials.of(user.getEmail(), wrongPassword);
 
@@ -74,6 +78,8 @@ class DefaultAuthenticationManagerTest {
         assertThat(result.getUser())
                 .as("If the result is 'failed', then user must be null!")
                 .isNull();
+
+        assertEquals(AuthenticationResult.PossibleErrors.INVALID_CREDENTIALS, result.getErrorDetails(), "If the invalid credentials were provided, then AuthenticationResult.PossibleErrors.INVALID_CREDENTIALS error should be returned");
 
     }
 
@@ -100,11 +106,13 @@ class DefaultAuthenticationManagerTest {
                 .as("If the result is 'failed', then user must be null!")
                 .isNull();
 
+        assertEquals(AuthenticationResult.PossibleErrors.INVALID_CREDENTIALS, result.getErrorDetails(), "If the invalid credentials were provided, then AuthenticationResult.PossibleErrors.INVALID_CREDENTIALS error should be returned");
+
     }
 
     @Test
-    @DisplayName("Authenticate the existing user but non-activated user and expect success as result")
-    void authenticateExistingNonActivatedUser_andExpectSuccess() {
+    @DisplayName("Authenticate the existing user but non-activated user and expect failed as result")
+    void authenticateExistingNonActivatedUser_andExpectFailed() {
         // given
         User user = UserFaker.create().makeInactive().get();
 
@@ -127,5 +135,7 @@ class DefaultAuthenticationManagerTest {
         assertThat(result.getUser())
                 .as("If the result is 'failed', then user must be null!")
                 .isNull();
+
+        assertEquals(AuthenticationResult.PossibleErrors.EMAIL_CONFIRMATION_REQUIRED, result.getErrorDetails(), "If the user exist but not activated, then AuthenticationResult.PossibleErrors.EMAIL_CONFIRMATION_REQUIRED error should be returned");
     }
 }

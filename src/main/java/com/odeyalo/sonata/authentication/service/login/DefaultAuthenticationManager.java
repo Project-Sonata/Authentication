@@ -26,9 +26,16 @@ public class DefaultAuthenticationManager implements AuthenticationManager {
     @Override
     public AuthenticationResult authenticate(LoginCredentials loginCredentials) {
         User user = userRepository.findUserByEmail(loginCredentials.getEmail());
-        if (user == null || !(passwordEncoder.matches(loginCredentials.getPassword(), user.getPassword()))) {
+        if (isUserInactive(user) || !(isPasswordMatches(loginCredentials, user))) {
             return AuthenticationResult.failed();
         }
         return AuthenticationResult.success(user);
+    }
+
+    private boolean isUserInactive(User user) {
+        return user == null || !user.isActive();
+    }
+    private boolean isPasswordMatches(LoginCredentials loginCredentials, User user) {
+        return passwordEncoder.matches(loginCredentials.getPassword(), user.getPassword());
     }
 }

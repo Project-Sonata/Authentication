@@ -1,13 +1,17 @@
 package com.odeyalo.sonata.authentication.controller;
 
+import com.odeyalo.sonata.authentication.common.LoginCredentials;
+import com.odeyalo.sonata.authentication.common.AuthenticationResult;
 import com.odeyalo.sonata.authentication.dto.UserInfo;
 import com.odeyalo.sonata.authentication.dto.error.ApiErrorDetailsInfo;
 import com.odeyalo.sonata.authentication.dto.request.ConfirmationCodeRequestDto;
 import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.dto.response.AuthenticationResultResponse;
 import com.odeyalo.sonata.authentication.dto.response.EmailConfirmationStatusResponseDto;
 import com.odeyalo.sonata.authentication.dto.response.UserRegistrationConfirmationResponseDto;
 import com.odeyalo.sonata.authentication.service.confirmation.EmailConfirmationManager;
 import com.odeyalo.sonata.authentication.service.confirmation.support.ConfirmationCodeCheckResult;
+import com.odeyalo.sonata.authentication.service.login.AuthenticationManager;
 import com.odeyalo.sonata.authentication.service.registration.RegistrationResult;
 import com.odeyalo.sonata.authentication.service.registration.UserRegistrationManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,12 +35,14 @@ public class AuthController {
     public static final String CONFIRMATION_URL_REL = "confirmation_url";
     public static final String CONFIRMATION_CODE_WAS_SENT_MESSAGE = "We sent confirmation letter to your email. Check it out";
     private final UserRegistrationManager userRegistrationManager;
-    private final EmailConfirmationManager manager;
+    private final EmailConfirmationManager emailConfirmationManager;
+    private final AuthenticationManager authenticationManager;
 
     @Autowired
-    public AuthController(UserRegistrationManager userRegistrationManager, EmailConfirmationManager manager) {
+    public AuthController(UserRegistrationManager userRegistrationManager, EmailConfirmationManager emailConfirmationManager, AuthenticationManager authenticationManager) {
         this.userRegistrationManager = userRegistrationManager;
-        this.manager = manager;
+        this.emailConfirmationManager = emailConfirmationManager;
+        this.authenticationManager = authenticationManager;
     }
 
     @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -53,7 +59,7 @@ public class AuthController {
 
     @PostMapping(value = "/confirm/email", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> confirmEmail(@RequestBody ConfirmationCodeRequestDto codeDto) {
-        ConfirmationCodeCheckResult result = manager.verifyCode(codeDto.getCodeValue());
+        ConfirmationCodeCheckResult result = emailConfirmationManager.verifyCode(codeDto.getCodeValue());
 
         if (!result.isValid()) {
             EmailConfirmationStatusResponseDto dto = EmailConfirmationStatusResponseDto.confirmationFailed(INVALID_CONFIRMATION_CODE_MESSAGE);
@@ -63,6 +69,16 @@ public class AuthController {
         EmailConfirmationStatusResponseDto dto = EmailConfirmationStatusResponseDto.confirmationSuccess(userInfo);
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(dto);
+    }
+
+    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<AuthenticationResultResponse> loginUser(@RequestBody LoginCredentials credentials) {
+        AuthenticationResult result = authenticationManager.authenticate(credentials);
+        AuthenticationResultResponse body = AuthenticationResultResponse.from(result);
+
+        return ResponseEntity.status(body.isSuccess() ? HttpStatus.OK : HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body);
     }
 
     private ResponseEntity<UserRegistrationConfirmationResponseDto> getSuccessResponse(UserRegistrationInfo info, UserRegistrationConfirmationResponseDto dto) {

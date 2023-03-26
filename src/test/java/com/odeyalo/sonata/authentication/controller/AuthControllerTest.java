@@ -2,10 +2,13 @@ package com.odeyalo.sonata.authentication.controller;
 
 import com.odeyalo.sonata.authentication.JsonTestUtils;
 import com.odeyalo.sonata.authentication.common.ErrorDetails;
+import com.odeyalo.sonata.authentication.common.LoginCredentials;
+import com.odeyalo.sonata.authentication.common.AuthenticationResult;
 import com.odeyalo.sonata.authentication.dto.UserInfo;
 import com.odeyalo.sonata.authentication.dto.error.ApiErrorDetailsInfo;
 import com.odeyalo.sonata.authentication.dto.request.ConfirmationCodeData;
 import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.dto.response.AuthenticationResultResponse;
 import com.odeyalo.sonata.authentication.dto.response.EmailConfirmationStatusResponseDto;
 import com.odeyalo.sonata.authentication.dto.response.UserRegistrationConfirmationResponseDto;
 import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
@@ -21,10 +24,10 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -54,8 +57,12 @@ class AuthControllerTest {
     @Autowired
     private JpaConfirmationCodeRepository confirmationCodeRepository;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
     public static final String SIGNUP_ENDPOINT_NAME = "/auth/signup";
     public static final String EMAIL_CONFIRMATION_ENDPOINT_NAME = "/auth/confirm/email";
+    public static final String LOGIN_ENDPOINT_NAME = "/auth/login";
 
     @Nested
     @TestInstance(value = TestInstance.Lifecycle.PER_CLASS)
@@ -278,6 +285,118 @@ class AuthControllerTest {
         }
     }
 
+
+    @Nested
+    class LoginEndpointAuthControllerTests {
+
+
+        @Test
+        @DisplayName("Test login endpoint with correct credentials and expect 200 OK and JSON body as result")
+        void loginEndpointWithCorrectCredentials_andExpectOkAndJson() throws Exception {
+            // given
+            String email = "odeyalo";
+            String rawPassword = "The world has not changed the people still suffer123";
+            String encodedPassword = passwordEncoder.encode(rawPassword);
+            User user = UserFaker.withEmail(email).overrideId(null).makeActive().overridePassword(encodedPassword).get();
+
+            User savedUser = ((UserRepository) userRepository).save(user);
+
+            UserInfo expectedUserInfo = UserInfo.from(savedUser);
+
+            LoginCredentials credentials = LoginCredentials.of(email, rawPassword);
+            String content = JsonTestUtils.convertToJson(credentials);
+            // when
+            MvcResult mvcResult = mockMvc.perform(post(LOGIN_ENDPOINT_NAME)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(content))
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                    .andReturn();
+            // then
+            AuthenticationResultResponse result = JsonTestUtils.convertToPojo(mvcResult, AuthenticationResultResponse.class);
+            assertTrue(result.isSuccess(), "If credentials are correct, then 'true' should be returned as result!");
+            assertEquals(expectedUserInfo, result.getUserInfo(), "If user has been authenticated, then user info should be returned!");
+        }
+
+        @Test
+        @DisplayName("Test login endpoint with incorrect credentials and expect 400 BAD_REQUEST and JSON body as result")
+        void loginEndpointWithIncorrectCredentials_andExpectBadRequestAndJson() throws Exception {
+            // given
+            String email = "odeyalo";
+            String rawPassword = "Miku is the best<3";
+            LoginCredentials credentials = LoginCredentials.of(email, rawPassword);
+            String content = JsonTestUtils.convertToJson(credentials);
+            // when
+            MvcResult mvcResult = mockMvc.perform(post(LOGIN_ENDPOINT_NAME)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(content))
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                    .andReturn();
+            // then
+            AuthenticationResultResponse result = JsonTestUtils.convertToPojo(mvcResult, AuthenticationResultResponse.class);
+
+            assertFalse(result.isSuccess(), "If credentials are incorrect, then 'false' should be returned as result!");
+            assertNull(result.getUserInfo(), "If credentials are incorrect, then null should be returned as user info");
+        }
+
+
+        @Test
+        @DisplayName("Test login endpoint with correct username but wrong password and expect 400 BAD_REQUEST and JSON body as result")
+        void loginEndpointWithCorrectUsernameButWrongPassword_andExpectBadRequestAndJson() throws Exception {
+            // given
+            String rawCorrectPassword = "MikuIsTheB3stGirl";
+            String incorrectPassword = "IdL0v3ToBeANewKurtCobain";
+
+            String encodedPassword = passwordEncoder.encode(rawCorrectPassword);
+            User user = UserFaker.create().overridePassword(encodedPassword).get();
+
+            LoginCredentials credentials = LoginCredentials.of(user.getEmail(), incorrectPassword);
+
+            ((UserRepository) userRepository).save(user);
+
+            String content = JsonTestUtils.convertToJson(credentials);
+            // when
+            MvcResult mvcResult = mockMvc.perform(post(LOGIN_ENDPOINT_NAME)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(content))
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                    .andReturn();
+            // then
+            AuthenticationResultResponse result = JsonTestUtils.convertToPojo(mvcResult, AuthenticationResultResponse.class);
+
+            assertFalse(result.isSuccess(), "If credentials are incorrect, then 'false' should be returned as result!");
+            assertNull(result.getUserInfo(), "If credentials are incorrect, then null should be returned as user info");
+        }
+
+
+        @Test
+        @DisplayName("Test login endpoint with correct credentials for not activated user and expect 400 BAD REQUEST and JSON body as result")
+        void loginEndpointWithCorrectCredentialsButForNotActivatedUser_andExpectOkAndJson() throws Exception {
+            // given
+            String email = "odeyalo";
+            String rawPassword = "The world has not changed the people still suffer123";
+            String encodedPassword = passwordEncoder.encode(rawPassword);
+            User user = UserFaker.withEmail(email).overrideId(null).makeInactive().overridePassword(encodedPassword).get();
+
+            ((UserRepository) userRepository).save(user);
+
+            LoginCredentials credentials = LoginCredentials.of(email, rawPassword);
+            String content = JsonTestUtils.convertToJson(credentials);
+            // when
+            MvcResult mvcResult = mockMvc.perform(post(LOGIN_ENDPOINT_NAME)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(content))
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                    .andReturn();
+            // then
+            AuthenticationResultResponse result = JsonTestUtils.convertToPojo(mvcResult, AuthenticationResultResponse.class);
+            assertFalse(result.isSuccess(), "If credentials are correct, then 'false' should be returned as result!");
+            assertNull(result.getUserInfo(), "If user is inactive, then null user info should be returned!");
+        }
+    }
 
     @AfterEach
     void clearDB() {

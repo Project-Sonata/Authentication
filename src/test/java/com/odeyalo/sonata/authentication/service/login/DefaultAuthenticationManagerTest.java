@@ -21,7 +21,7 @@ class DefaultAuthenticationManagerTest {
     @DisplayName("Authenticate the existing user and expect success as result")
     void authenticateExistingUser_andExpectSuccess() {
         // given
-        User user = UserFaker.create().get();
+        User user = UserFaker.create().makeActive().get();
 
         LoginCredentials credentials = LoginCredentials.of(user.getEmail(), user.getPassword());
 
@@ -100,5 +100,32 @@ class DefaultAuthenticationManagerTest {
                 .as("If the result is 'failed', then user must be null!")
                 .isNull();
 
+    }
+
+    @Test
+    @DisplayName("Authenticate the existing user but non-activated user and expect success as result")
+    void authenticateExistingNonActivatedUser_andExpectSuccess() {
+        // given
+        User user = UserFaker.create().makeInactive().get();
+
+        LoginCredentials credentials = LoginCredentials.of(user.getEmail(), user.getPassword());
+
+        AuthenticationManagerTestingFactory.DefaultAuthenticationManagerBuilder builder = AuthenticationManagerTestingFactory.createDefaultBuilder();
+
+        PasswordEncoder passwordEncoder = builder.getPasswordEncoder();
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+
+        DefaultAuthenticationManager authenticationManager = builder.withPredefinedUsers(user).build();
+        // when
+        AuthenticationResult result = authenticationManager.authenticate(credentials);
+        // then
+        assertThat(result.isSuccess())
+                .as("If the credentials are correct but user is not activated, then 'failed' should be returned!")
+                .isFalse();
+
+        assertThat(result.getUser())
+                .as("If the result is 'failed', then user must be null!")
+                .isNull();
     }
 }

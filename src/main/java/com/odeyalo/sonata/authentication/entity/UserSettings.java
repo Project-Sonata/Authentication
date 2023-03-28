@@ -2,10 +2,7 @@ package com.odeyalo.sonata.authentication.entity;
 
 import com.odeyalo.sonata.authentication.entity.settings.UserMfaSettings;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Data
@@ -19,8 +16,17 @@ public class UserSettings {
     private Long id;
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
+    @ToString.Exclude
     private User user;
     @JoinColumn(name = "mfa_settings_id", updatable = false, nullable = false)
-    @OneToOne
-    private UserMfaSettings userMfaSettings = UserMfaSettings.empty(user);
+    @OneToOne(cascade = CascadeType.ALL)
+    private UserMfaSettings userMfaSettings;
+
+    public static UserSettings empty(User user) {
+        UserMfaSettings emptyMfa = UserMfaSettings.empty(user);
+        return UserSettings.builder()
+                .user(user)
+                .userMfaSettings(emptyMfa)
+                .build();
+    }
 }

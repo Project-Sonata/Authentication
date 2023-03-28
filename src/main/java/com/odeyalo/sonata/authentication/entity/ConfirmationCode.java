@@ -21,7 +21,7 @@ public class ConfirmationCode {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "code", nullable = false, unique = true)
+    @Column(name = "code_value", nullable = false, unique = true)
     private String codeValue;
 
     @Column(name = "created_at", nullable = false)

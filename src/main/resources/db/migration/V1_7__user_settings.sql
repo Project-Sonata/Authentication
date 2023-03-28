@@ -1,5 +1,5 @@
 CREATE TABLE user_settings(
-  id BIGINT PRIMARY KEY,
+  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   user_id BIGINT,
   mfa_settings_id BIGINT,
 

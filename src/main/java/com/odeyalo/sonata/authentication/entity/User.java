@@ -29,7 +29,8 @@ public class User {
     private String password;
     @Column(name = "is_activated", nullable = false)
     private boolean active;
-
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private UserSettings userSettings;
     @NaturalId
     private String naturalId;
 

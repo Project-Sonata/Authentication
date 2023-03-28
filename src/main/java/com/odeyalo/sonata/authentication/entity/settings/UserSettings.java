@@ -1,6 +1,6 @@
-package com.odeyalo.sonata.authentication.entity;
+package com.odeyalo.sonata.authentication.entity.settings;
 
-import com.odeyalo.sonata.authentication.entity.settings.UserMfaSettings;
+import com.odeyalo.sonata.authentication.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 

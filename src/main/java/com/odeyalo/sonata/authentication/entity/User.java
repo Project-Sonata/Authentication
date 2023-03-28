@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.authentication.entity;
 
+import com.odeyalo.sonata.authentication.entity.settings.UserSettings;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

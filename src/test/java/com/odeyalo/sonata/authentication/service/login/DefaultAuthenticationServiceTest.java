@@ -15,9 +15,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Tests for {@link DefaultAuthenticationManager}
+ * Tests for {@link DefaultAuthenticationService}
  */
-class DefaultAuthenticationManagerTest {
+class DefaultAuthenticationServiceTest {
 
     @Test
     @DisplayName("Authenticate the existing user and expect success as result")
@@ -33,7 +33,7 @@ class DefaultAuthenticationManagerTest {
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
 
-        DefaultAuthenticationManager authenticationManager = builder.withPredefinedUsers(user).build();
+        DefaultAuthenticationService authenticationManager = builder.withPredefinedUsers(user).build();
         // when
         AuthenticationResult result = authenticationManager.authenticate(credentials);
         // then
@@ -67,7 +67,7 @@ class DefaultAuthenticationManagerTest {
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
 
-        DefaultAuthenticationManager authenticationManager = builder
+        DefaultAuthenticationService authenticationManager = builder
                 .withPredefinedUsers(user)
                 .build();
         // when
@@ -97,7 +97,7 @@ class DefaultAuthenticationManagerTest {
 
         LoginCredentials incorrectCredentials = LoginCredentials.of(email, password);
 
-        DefaultAuthenticationManager authenticationManager = AuthenticationManagerTestingFactory.createDefault();
+        DefaultAuthenticationService authenticationManager = AuthenticationManagerTestingFactory.createDefault();
 
         // when
         AuthenticationResult result = authenticationManager.authenticate(incorrectCredentials);
@@ -131,7 +131,7 @@ class DefaultAuthenticationManagerTest {
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
 
-        DefaultAuthenticationManager authenticationManager = builder.withPredefinedUsers(user).build();
+        DefaultAuthenticationService authenticationManager = builder.withPredefinedUsers(user).build();
         // when
         AuthenticationResult result = authenticationManager.authenticate(credentials);
         // then
@@ -168,7 +168,7 @@ class DefaultAuthenticationManagerTest {
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
 
-        DefaultAuthenticationManager authenticationManager = builder
+        DefaultAuthenticationService authenticationManager = builder
                 .withPredefinedUsers(user)
                 .build();
 

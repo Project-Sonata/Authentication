@@ -2,22 +2,22 @@ package com.odeyalo.sonata.authentication.testing.factory;
 
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
-import com.odeyalo.sonata.authentication.service.login.AuthenticationManager;
-import com.odeyalo.sonata.authentication.service.login.DefaultAuthenticationManager;
+import com.odeyalo.sonata.authentication.service.login.AuthenticationService;
+import com.odeyalo.sonata.authentication.service.login.DefaultAuthenticationService;
 import lombok.Getter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- * Factory to create a new {@link AuthenticationManager} in test environment
+ * Factory to create a new {@link AuthenticationService} in test environment
  */
 public class AuthenticationManagerTestingFactory {
 
-    public static AuthenticationManager create() {
+    public static AuthenticationService create() {
         return createDefault();
     }
 
-    public static DefaultAuthenticationManager createDefault() {
+    public static DefaultAuthenticationService createDefault() {
         return createDefaultBuilder().build();
     }
 
@@ -49,8 +49,8 @@ public class AuthenticationManagerTestingFactory {
             return this;
         }
 
-        public DefaultAuthenticationManager build() {
-            return new DefaultAuthenticationManager(userRepository, passwordEncoder);
+        public DefaultAuthenticationService build() {
+            return new DefaultAuthenticationService(userRepository, passwordEncoder);
         }
     }
 }

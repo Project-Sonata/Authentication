@@ -10,16 +10,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
- * Default {@link AuthenticationManager} implementation that just authenticate the users through
+ * Default {@link AuthenticationService} implementation that just authenticate the users through
  * {@link UserRepository}
  */
 @Service
-public class DefaultAuthenticationManager implements AuthenticationManager {
+public class DefaultAuthenticationService implements AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public DefaultAuthenticationManager(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public DefaultAuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -31,7 +31,15 @@ public class DefaultAuthenticationManager implements AuthenticationManager {
             ErrorDetails details = determineError(user);
             return AuthenticationResult.failed(details);
         }
-        return AuthenticationResult.success(user);
+        return isMfaEnabled(user) ?
+                AuthenticationResult.success(user, AuthenticationResult.Type.PENDING_MFA)
+                :
+                AuthenticationResult.success(user, AuthenticationResult.Type.LOGIN_COMPLETED);
+
+    }
+
+    private boolean isMfaEnabled(User user) {
+        return user.getUserSettings().getUserMfaSettings().isEnabled();
     }
 
     private ErrorDetails determineError(User user) {

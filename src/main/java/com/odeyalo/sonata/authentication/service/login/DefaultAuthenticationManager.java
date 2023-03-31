@@ -31,7 +31,15 @@ public class DefaultAuthenticationManager implements AuthenticationManager {
             ErrorDetails details = determineError(user);
             return AuthenticationResult.failed(details);
         }
-        return AuthenticationResult.success(user);
+        return isMfaEnabled(user) ?
+                AuthenticationResult.success(user, AuthenticationResult.Type.PENDING_MFA)
+                :
+                AuthenticationResult.success(user, AuthenticationResult.Type.LOGIN_COMPLETED);
+
+    }
+
+    private boolean isMfaEnabled(User user) {
+        return user.getUserSettings().getUserMfaSettings().isEnabled();
     }
 
     private ErrorDetails determineError(User user) {

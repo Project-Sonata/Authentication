@@ -48,5 +48,8 @@ public class User {
         if (naturalId == null) {
             naturalId = UUID.randomUUID().toString();
         }
+        if (userSettings == null) {
+            userSettings = UserSettings.empty(this);
+        }
     }
 }

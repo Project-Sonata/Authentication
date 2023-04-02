@@ -5,27 +5,19 @@
   "available_methods": [
     {
       "name": "qrcode",
-      "websocket_required": true,
-      "url": "https://accounts.sonataproject.com/authentication/login/2mfa?method=qrcode",
-      "description": "You will need to scan the qrcode using Sonata Project phone application to login in"
+      "url": "https://accounts.sonataproject.com/authentication/mfa/login?method=qrcode"
     },
     {
       "name": "email",
-      "websocket_required": false,
-      "url": "https://accounts.sonataproject.com/authentication/login/2mfa?method=email",
-      "description": "Confirmation code will be sent to your email"
+      "url": "https://accounts.sonataproject.com/authentication/mfa/login?method=email"
     },
     {
       "name": "mobile_app",
-      "websocket_required": true,
-      "url": "https://accounts.sonataproject.com/authentication/login/2mfa?method=mobile",
-      "description": "Open the Sonata Project on your phone and check your available confirmations"
+      "url": "https://accounts.sonataproject.com/authentication/mfa/login?method=mobile"
     },
     {
       "name": "totp",
-      "websocket_required": false,
-      "url": "https://accounts.sonataproject.com/authentication/login/2mfa?method=totp",
-      "description": "Open MFA application that you used while registration and enter the code"
+      "url": "https://accounts.sonataproject.com/authentication/login/mfa?method=totp"
     }
   ],
   "session_id": "a1b2c3",

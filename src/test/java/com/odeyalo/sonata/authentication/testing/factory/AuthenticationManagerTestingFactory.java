@@ -4,6 +4,8 @@ import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
 import com.odeyalo.sonata.authentication.service.login.AuthenticationManager;
 import com.odeyalo.sonata.authentication.service.login.DefaultAuthenticationManager;
+import com.odeyalo.sonata.authentication.service.login.mfa.AdditionalAuthenticationRequirementProvider;
+import com.odeyalo.sonata.authentication.service.login.mfa.NoOpAdditionalAuthenticationRequirementProvider;
 import lombok.Getter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,6 +33,7 @@ public class AuthenticationManagerTestingFactory {
     public static class DefaultAuthenticationManagerBuilder {
         private UserRepository userRepository = UserRepositoryTestingFactory.create();
         private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        private AdditionalAuthenticationRequirementProvider additionalAuthenticationRequirementProvider = new NoOpAdditionalAuthenticationRequirementProvider();
 
         public DefaultAuthenticationManagerBuilder overrideUserRepository(UserRepository userRepository) {
             this.userRepository = userRepository;
@@ -48,9 +51,13 @@ public class AuthenticationManagerTestingFactory {
             }
             return this;
         }
+        public DefaultAuthenticationManagerBuilder overrideAdditionalAuthenticationRequirementProvider(AdditionalAuthenticationRequirementProvider additionalAuthenticationRequirementProvider) {
+            this.additionalAuthenticationRequirementProvider = additionalAuthenticationRequirementProvider;
+            return this;
+        }
 
         public DefaultAuthenticationManager build() {
-            return new DefaultAuthenticationManager(userRepository, passwordEncoder);
+            return new DefaultAuthenticationManager(userRepository, passwordEncoder, additionalAuthenticationRequirementProvider);
         }
     }
 }

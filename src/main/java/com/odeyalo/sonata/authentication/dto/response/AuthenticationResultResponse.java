@@ -6,7 +6,7 @@ import com.odeyalo.sonata.authentication.common.AuthenticationResult;
 import com.odeyalo.sonata.authentication.common.ErrorDetails;
 import com.odeyalo.sonata.authentication.dto.UserInfo;
 import com.odeyalo.sonata.authentication.entity.settings.UserMfaSettings;
-import com.odeyalo.sonata.authentication.support.DescribableMfaTypeMethodCreator;
+import com.odeyalo.sonata.authentication.support.MfaTypeMethodInfoCreator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +24,7 @@ public class AuthenticationResultResponse {
     private UserInfo userInfo;
     private AuthenticationResult.Type type;
     @JsonProperty("available_methods")
-    private Set<DescribableMfaTypeMethod> supportedMfaTypes;
+    private Set<MfaTypeMethodInfo> supportedMfaTypes;
     // Used if the application cannot perform authentication
     @JsonProperty("error_details")
     private ErrorDetails errorDetails;
@@ -41,7 +41,7 @@ public class AuthenticationResultResponse {
     public static AuthenticationResultResponse success(UserInfo userInfo,
                                                        AuthenticationResult.Type type,
                                                        Set<UserMfaSettings.MfaType> types) {
-        return new AuthenticationResultResponse(true, userInfo,type, DescribableMfaTypeMethodCreator.from(types), null);
+        return new AuthenticationResultResponse(true, userInfo,type, MfaTypeMethodInfoCreator.from(types), null);
     }
 
     public static AuthenticationResultResponse failed(ErrorDetails details) {
@@ -51,13 +51,13 @@ public class AuthenticationResultResponse {
 
     @Data
     @Builder
-    public static class DescribableMfaTypeMethod {
+    public static class MfaTypeMethodInfo {
         private String name;
         // URL to obtain additional information about this MFA method.
         private String url;
 
-        public static DescribableMfaTypeMethod of(String name, String url) {
-            return new DescribableMfaTypeMethod(name, url);
+        public static MfaTypeMethodInfo of(String name, String url) {
+            return new MfaTypeMethodInfo(name, url);
         }
     }
 }

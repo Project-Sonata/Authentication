@@ -11,20 +11,20 @@ import java.util.stream.Collectors;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-public class DescribableMfaTypeMethodCreator {
+public class MfaTypeMethodInfoCreator {
 
-    public static AuthenticationResultResponse.DescribableMfaTypeMethod from(UserMfaSettings.MfaType type) {
+    public static AuthenticationResultResponse.MfaTypeMethodInfo from(UserMfaSettings.MfaType type) {
         try {
             String typeName = type.name().toLowerCase();
             String url = linkTo(methodOn(MfaController.class).descriptionLoginMfa(typeName)).toString();
-            return AuthenticationResultResponse.DescribableMfaTypeMethod.of(typeName,
+            return AuthenticationResultResponse.MfaTypeMethodInfo.of(typeName,
                     url);
         } catch (Exception ex) {
             throw new IllegalArgumentException("Failed to create url. Check nested exception", ex);
         }
     }
 
-    public static Set<AuthenticationResultResponse.DescribableMfaTypeMethod> from(Set<UserMfaSettings.MfaType> types) {
-        return types.stream().map(DescribableMfaTypeMethodCreator::from).collect(Collectors.toCollection(HashSet::new));
+    public static Set<AuthenticationResultResponse.MfaTypeMethodInfo> from(Set<UserMfaSettings.MfaType> types) {
+        return types.stream().map(MfaTypeMethodInfoCreator::from).collect(Collectors.toCollection(HashSet::new));
     }
 }

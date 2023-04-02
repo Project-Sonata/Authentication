@@ -5,23 +5,24 @@ import com.odeyalo.sonata.authentication.common.ErrorDetails;
 import com.odeyalo.sonata.authentication.common.LoginCredentials;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.odeyalo.sonata.authentication.service.login.mfa.AdditionalAuthenticationRequirementProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
 /**
  * Default {@link AuthenticationManager} implementation that just authenticate the users through
  * {@link UserRepository}
  */
-@Service
 public class DefaultAuthenticationManager implements AuthenticationManager {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AdditionalAuthenticationRequirementProvider additionalAuthenticationRequirementProvider;
 
-    @Autowired
-    public DefaultAuthenticationManager(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public DefaultAuthenticationManager(UserRepository userRepository,
+                                        PasswordEncoder passwordEncoder,
+                                        AdditionalAuthenticationRequirementProvider additionalAuthenticationRequirementProvider) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.additionalAuthenticationRequirementProvider = additionalAuthenticationRequirementProvider;
     }
 
     @Override
@@ -31,10 +32,7 @@ public class DefaultAuthenticationManager implements AuthenticationManager {
             ErrorDetails details = determineError(user);
             return AuthenticationResult.failed(details);
         }
-        return isMfaEnabled(user) ?
-                AuthenticationResult.success(user, AuthenticationResult.Type.PENDING_MFA)
-                :
-                AuthenticationResult.success(user, AuthenticationResult.Type.LOGIN_COMPLETED);
+        return additionalAuthenticationRequirementProvider.authenticate(user);
 
     }
 

@@ -53,15 +53,11 @@ public class AuthenticationResultResponse {
     @Builder
     public static class DescribableMfaTypeMethod {
         private String name;
-        // True if this mfa type requires websocket connection
-        @JsonProperty("websocket_required")
-        private boolean requireWs;
         // URL to obtain additional information about this MFA method.
         private String url;
-        private String description;
 
-        public static DescribableMfaTypeMethod of(String name, boolean requireWs, String url, String description) {
-            return new DescribableMfaTypeMethod(name, requireWs, url, description);
+        public static DescribableMfaTypeMethod of(String name, String url) {
+            return new DescribableMfaTypeMethod(name, url);
         }
     }
 }

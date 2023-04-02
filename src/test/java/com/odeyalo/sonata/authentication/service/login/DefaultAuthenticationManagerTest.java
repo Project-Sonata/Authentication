@@ -5,11 +5,14 @@ import com.odeyalo.sonata.authentication.common.LoginCredentials;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.entity.settings.UserMfaSettings;
 import com.odeyalo.sonata.authentication.entity.settings.UserSettings;
+import com.odeyalo.sonata.authentication.service.login.mfa.MfaAdditionalAuthenticationRequirementProvider;
 import com.odeyalo.sonata.authentication.testing.factory.AuthenticationManagerTestingFactory;
 import com.odeyalo.sonata.authentication.testing.faker.UserFaker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -170,6 +173,7 @@ class DefaultAuthenticationManagerTest {
 
         DefaultAuthenticationManager authenticationManager = builder
                 .withPredefinedUsers(user)
+                .overrideAdditionalAuthenticationRequirementProvider(new MfaAdditionalAuthenticationRequirementProvider())
                 .build();
 
         // when
@@ -184,5 +188,10 @@ class DefaultAuthenticationManagerTest {
         assertThat(result.getUser())
                 .as("If authenticate was success, then exactly the same user should be returned")
                 .isEqualTo(user);
+
+        Set<UserMfaSettings.MfaType> supportedMfaTypes = result.getSupportedMfaTypes();
+        assertThat(mfaSettings.getAuthorizedMfaTypes())
+                .as("Mfa types should be exactly equal to types that were previously registered by user")
+                .isEqualTo(supportedMfaTypes);
     }
 }

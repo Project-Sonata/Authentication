@@ -1,10 +1,13 @@
 package com.odeyalo.sonata.authentication.common;
 
 import com.odeyalo.sonata.authentication.entity.User;
+import com.odeyalo.sonata.authentication.entity.settings.UserMfaSettings;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.Set;
 
 /**
  * Result of the authentication, if everything is okay, then authenticated user will be returned
@@ -18,18 +21,23 @@ public class AuthenticationResult {
     // Used if the application cannot perform authentication
     private ErrorDetails errorDetails;
     private Type type;
+    private Set<UserMfaSettings.MfaType> supportedMfaTypes;
 
     public AuthenticationResult(boolean success, User user) {
         this.success = success;
         this.user = user;
     }
 
+    public static AuthenticationResult pendingMfa(User user, Set<UserMfaSettings.MfaType> supportedMfaTypes) {
+        return new AuthenticationResult(true, user, null, Type.PENDING_MFA, supportedMfaTypes);
+    }
+
     public static AuthenticationResult success(User user, Type type) {
-        return new AuthenticationResult(true, user, null, type);
+        return new AuthenticationResult(true, user, null, type, null);
     }
 
     public static AuthenticationResult failed(ErrorDetails details) {
-        return new AuthenticationResult(false, null, details, Type.FAILED);
+        return new AuthenticationResult(false, null, details, Type.FAILED, null);
     }
 
     /**

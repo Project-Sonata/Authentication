@@ -4,15 +4,20 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.odeyalo.sonata.authentication.common.AuthenticationResult;
 import com.odeyalo.sonata.authentication.common.ErrorDetails;
+import com.odeyalo.sonata.authentication.controller.MfaController;
 import com.odeyalo.sonata.authentication.dto.UserInfo;
 import com.odeyalo.sonata.authentication.entity.settings.UserMfaSettings;
-import com.odeyalo.sonata.authentication.support.MfaTypeMethodInfoCreator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Data
 @AllArgsConstructor
@@ -41,7 +46,7 @@ public class AuthenticationResultResponse {
     public static AuthenticationResultResponse success(UserInfo userInfo,
                                                        AuthenticationResult.Type type,
                                                        Set<UserMfaSettings.MfaType> types) {
-        return new AuthenticationResultResponse(true, userInfo,type, MfaTypeMethodInfoCreator.from(types), null);
+        return new AuthenticationResultResponse(true, userInfo,type, MfaTypeMethodInfo.from(types), null);
     }
 
     public static AuthenticationResultResponse failed(ErrorDetails details) {
@@ -58,6 +63,22 @@ public class AuthenticationResultResponse {
 
         public static MfaTypeMethodInfo of(String name, String url) {
             return new MfaTypeMethodInfo(name, url);
+        }
+
+
+        public static AuthenticationResultResponse.MfaTypeMethodInfo from(UserMfaSettings.MfaType type) {
+            try {
+                String typeName = type.name().toLowerCase();
+                String url = linkTo(methodOn(MfaController.class).descriptionLoginMfa(typeName)).toString();
+                return AuthenticationResultResponse.MfaTypeMethodInfo.of(typeName,
+                        url);
+            } catch (Exception ex) {
+                throw new IllegalArgumentException("Failed to create url. Check nested exception", ex);
+            }
+        }
+
+        public static Set<AuthenticationResultResponse.MfaTypeMethodInfo> from(Set<UserMfaSettings.MfaType> types) {
+            return types.stream().map(MfaTypeMethodInfo::from).collect(Collectors.toCollection(HashSet::new));
         }
     }
 }

@@ -322,7 +322,7 @@ class DelegatingPersistentConfirmationCodeManagerTest {
         ConfirmationCode.LifecycleStage actualLifecycleStage = persistentConfirmationCodeManager.getLifecycleStage(newCode);
         // then
         assertThat(actualLifecycleStage)
-                .as("If code was created just now, then LifecycleStage should be CREATED")
+                .as("If code was created just creationTime, then LifecycleStage should be CREATED")
                 .isEqualTo(ConfirmationCode.LifecycleStage.CREATED);
     }
 
@@ -389,7 +389,7 @@ class DelegatingPersistentConfirmationCodeManagerTest {
         ConfirmationCode.LifecycleStage actualLifecycleStage = persistentConfirmationCodeManager.getLifecycleStage(newCode.getCode());
         // then
         assertThat(actualLifecycleStage)
-                .as("If code was created just now, then LifecycleStage should be CREATED")
+                .as("If code was created just creationTime, then LifecycleStage should be CREATED")
                 .isEqualTo(ConfirmationCode.LifecycleStage.CREATED);
     }
 

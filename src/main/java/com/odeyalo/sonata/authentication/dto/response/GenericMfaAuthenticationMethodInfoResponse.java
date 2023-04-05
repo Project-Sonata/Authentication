@@ -10,15 +10,15 @@ import org.springframework.hateoas.RepresentationModel;
 @AllArgsConstructor
 @Builder
 @Data
-public class GenericMfaMethodInfoResponse extends RepresentationModel<GenericMfaMethodInfoResponse> {
+public class GenericMfaAuthenticationMethodInfoResponse extends RepresentationModel<GenericMfaAuthenticationMethodInfoResponse> {
     @JsonProperty("require_websocket")
     private final boolean requireWs;
-    private final String type = "email";
+    private final String type;
     @JsonProperty("user_info")
     private final UserInfo userInfo;
     private final String content;
 
-    public static GenericMfaMethodInfoResponse of(UserInfo userInfo, String content, boolean requireWs) {
-        return new GenericMfaMethodInfoResponse(requireWs, userInfo, content);
+    public static GenericMfaAuthenticationMethodInfoResponse of(UserInfo userInfo, String type, String content, boolean requireWs) {
+        return new GenericMfaAuthenticationMethodInfoResponse(requireWs, type, userInfo, content);
     }
 }

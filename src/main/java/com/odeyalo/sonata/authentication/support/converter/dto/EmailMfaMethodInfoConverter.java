@@ -1,11 +1,11 @@
-package com.odeyalo.sonata.authentication.support.conterter.dto;
+package com.odeyalo.sonata.authentication.support.converter.dto;
 
 import com.odeyalo.sonata.authentication.controller.MfaController;
 import com.odeyalo.sonata.authentication.dto.UserInfo;
 import com.odeyalo.sonata.authentication.dto.response.GenericMfaMethodInfoResponse;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.service.mfa.MfaMethodInfo;
-import com.odeyalo.sonata.authentication.support.conterter.MfaMethodInfoConverter;
+import com.odeyalo.sonata.authentication.support.converter.MfaMethodInfoConverter;
 import org.springframework.stereotype.Service;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;

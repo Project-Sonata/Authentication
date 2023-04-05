@@ -1,4 +1,4 @@
-package com.odeyalo.sonata.authentication.support.conterter;
+package com.odeyalo.sonata.authentication.support.converter;
 
 import com.odeyalo.sonata.authentication.service.mfa.MfaMethodInfo;
 import org.springframework.core.convert.converter.Converter;

@@ -58,20 +58,18 @@ public class AuthenticationResultResponse {
     @Builder
     public static class MfaTypeMethodInfo {
         private String name;
-        // URL to obtain additional information about this MFA method.
+        // URL to start and obtain additional information about this MFA method.
         private String url;
 
         public static MfaTypeMethodInfo of(String name, String url) {
-            return new MfaTypeMethodInfo(name, url);
+            return new MfaTypeMethodInfo( name, url);
         }
-
 
         public static AuthenticationResultResponse.MfaTypeMethodInfo from(UserMfaSettings.MfaType type) {
             try {
                 String typeName = type.name().toLowerCase();
-                String url = linkTo(methodOn(MfaController.class).descriptionLoginMfa(typeName)).toString();
-                return AuthenticationResultResponse.MfaTypeMethodInfo.of(typeName,
-                        url);
+                String url = linkTo(methodOn(MfaController.class).startMfaProcess(null, null)).toString();
+                return AuthenticationResultResponse.MfaTypeMethodInfo.of(typeName, url);
             } catch (Exception ex) {
                 throw new IllegalArgumentException("Failed to create url. Check nested exception", ex);
             }

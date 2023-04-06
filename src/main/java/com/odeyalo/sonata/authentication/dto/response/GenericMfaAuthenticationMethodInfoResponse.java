@@ -7,7 +7,6 @@ import org.springframework.hateoas.RepresentationModel;
 
 @EqualsAndHashCode(callSuper = true)
 @RequiredArgsConstructor
-@AllArgsConstructor
 @Builder
 @Data
 public class GenericMfaAuthenticationMethodInfoResponse extends RepresentationModel<GenericMfaAuthenticationMethodInfoResponse> {

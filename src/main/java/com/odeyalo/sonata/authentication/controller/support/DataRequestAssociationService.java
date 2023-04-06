@@ -18,10 +18,4 @@ public interface DataRequestAssociationService {
     void associateData(String key, Object value, HttpServletRequest request, HttpServletResponse response);
 
     Object get(HttpServletRequest request, String key);
-
-
-    class AssociatedId {
-        private String name;
-        private String id;
-    }
 }

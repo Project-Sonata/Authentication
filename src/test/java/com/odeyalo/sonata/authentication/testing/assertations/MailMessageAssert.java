@@ -2,6 +2,7 @@ package com.odeyalo.sonata.authentication.testing.assertations;
 
 import com.odeyalo.sonata.authentication.service.confirmation.EmailReceiver;
 import com.odeyalo.sonata.authentication.service.sender.MailMessage;
+import com.odeyalo.sonata.authentication.support.email.message.EmailMessageTypeCode;
 import org.apache.commons.lang3.BooleanUtils;
 import org.assertj.core.api.AbstractAssert;
 import org.springframework.util.Assert;
@@ -50,6 +51,12 @@ public class MailMessageAssert extends AbstractAssert<MailMessageAssert, MailMes
         return new EmailReceiverMailMessageAssert(message, this);
     }
 
+    public MailMessageAssert type(EmailMessageTypeCode expected) {
+        if (message.getMessageType() != expected) {
+            failWithMessage("The type must be exactly the same!. Expected: %s, Actual: %s", expected, message.getMessageType());
+        }
+        return this;
+    }
 
     public static class ContentMailMessageAssert extends AbstractAssert<ContentMailMessageAssert, MailMessage> {
         private final MailMessageAssert parentAssert;

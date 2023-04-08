@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.authentication.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.odeyalo.sonata.authentication.common.AuthenticationResult;
@@ -7,10 +8,7 @@ import com.odeyalo.sonata.authentication.common.ErrorDetails;
 import com.odeyalo.sonata.authentication.controller.MfaController;
 import com.odeyalo.sonata.authentication.dto.UserInfo;
 import com.odeyalo.sonata.authentication.entity.settings.UserMfaSettings;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -56,6 +54,8 @@ public class AuthenticationResultResponse {
 
     @Data
     @Builder
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor
     public static class MfaTypeMethodInfo {
         private String name;
         // URL to start and obtain additional information about this MFA method.

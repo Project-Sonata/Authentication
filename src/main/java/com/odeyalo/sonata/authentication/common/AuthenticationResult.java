@@ -33,7 +33,7 @@ public class AuthenticationResult {
     }
 
     public static AuthenticationResult success(User user, Type type) {
-        return new AuthenticationResult(true, user, null, type, null);
+        return new AuthenticationResult(true, user, null, type, user.getUserSettings().getUserMfaSettings().getAuthorizedMfaTypes());
     }
 
     public static AuthenticationResult failed(ErrorDetails details) {

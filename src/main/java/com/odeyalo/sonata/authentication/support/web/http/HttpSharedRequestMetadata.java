@@ -3,6 +3,7 @@ package com.odeyalo.sonata.authentication.support.web.http;
 import com.odeyalo.sonata.authentication.support.request.SharedRequestMetadata;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.ToString;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * {@link SharedRequestMetadata} implementation that used to store info about HTTP request
  */
+@ToString
 public class HttpSharedRequestMetadata implements SharedRequestMetadata {
     private final Map<String, String> headers = new ConcurrentHashMap<>();
     private final Map<String, String> parameters = new ConcurrentHashMap<>();

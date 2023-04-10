@@ -52,6 +52,10 @@ public class UserMfaSettings {
         return authorizedMfaTypes != null && !authorizedMfaTypes.contains(MfaType.NONE);
     }
 
+    public boolean isEnabledType(UserMfaSettings.MfaType type) {
+        return authorizedMfaTypes.contains(type);
+    }
+
     public enum MfaType {
         /**
          * If MFA should be not enabled.

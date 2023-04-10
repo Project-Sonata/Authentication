@@ -2,6 +2,7 @@ package com.odeyalo.sonata.authentication.service.mfa.handler;
 
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.entity.settings.UserMfaSettings;
+import com.odeyalo.sonata.authentication.exceptions.UnsupportedMfaMethodException;
 import com.odeyalo.sonata.authentication.service.mfa.MfaConfirmationSubmission;
 import com.odeyalo.sonata.authentication.service.mfa.MfaMethodInfo;
 
@@ -17,8 +18,9 @@ public interface MfaMethodHandler {
      * should create and send confirmation code to user's email.
      * @param user - The user to start the MFA confirmation process for.
      * @return - MfaMethodInfo object containing information about the MFA method being used for confirmation.
+     * @throws UnsupportedMfaMethodException - if the user does not have enabled {@link #supportedMfaType() supported mfa type}
      */
-    MfaMethodInfo startMfaConfirmation(User user);
+    MfaMethodInfo startMfaConfirmation(User user) throws UnsupportedMfaMethodException;
 
     /**
      * Checks whether the submitted MFA confirmation code is valid.

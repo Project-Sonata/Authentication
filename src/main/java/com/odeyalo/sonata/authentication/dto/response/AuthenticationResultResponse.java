@@ -68,7 +68,7 @@ public class AuthenticationResultResponse {
         public static AuthenticationResultResponse.MfaTypeMethodInfo from(UserMfaSettings.MfaType type) {
             try {
                 String typeName = type.name().toLowerCase();
-                String url = linkTo(methodOn(MfaController.class).startMfaProcess(null, null)).toString();
+                String url = linkTo(methodOn(MfaController.class).startMfaProcess(type.name().toLowerCase(), null, null)).toString();
                 return AuthenticationResultResponse.MfaTypeMethodInfo.of(typeName, url);
             } catch (Exception ex) {
                 throw new IllegalArgumentException("Failed to create url. Check nested exception", ex);

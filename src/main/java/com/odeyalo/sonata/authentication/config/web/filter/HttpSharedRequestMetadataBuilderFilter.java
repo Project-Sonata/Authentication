@@ -28,5 +28,6 @@ public class HttpSharedRequestMetadataBuilderFilter extends GenericFilter {
         HttpSharedRequestMetadata metadata = new HttpSharedRequestMetadata(request);
         container.setSharedRequestMetadata(metadata);
         logger.debug("Set the shared request metadata in HTTP environment: {}", metadata);
+        filterChain.doFilter(request, servletResponse);
     }
 }

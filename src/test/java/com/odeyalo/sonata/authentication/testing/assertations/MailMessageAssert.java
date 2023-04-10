@@ -98,6 +98,21 @@ public class MailMessageAssert extends AbstractAssert<MailMessageAssert, MailMes
                     .isEqualTo(new String(actual.getContent()));
             return this;
         }
+
+        public ContentMailMessageAssert mustContainRegex(String regex) {
+            assertThat(new String(actual.getContent()))
+                    .as("The content message must contain following regex: '%s'", regex)
+                    .matches(regex);
+            return this;
+        }
+
+        public ContentMailMessageAssert mustContain(String part) {
+            assertThat(new String(actual.getContent()))
+                    .as("The content message must contain following part: '%s'.\n Original message: %s", part, new String(actual.getContent()))
+                    .contains(part);
+            return this;
+        }
+
     }
 
     public static class SubjectMailMessageAssert extends AbstractAssert<SubjectMailMessageAssert, MailMessage> {

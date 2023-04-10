@@ -1,13 +1,25 @@
 {
-  "status": 200,
   "mfa_enabled": true,
-  "message": "The MFA is enabled. Check your device or email",
-  "_links": {
-    "self": {
-      "href": "https://sonataproject.com/api/v1/auth/signup"
+  "type": "pending_mfa",
+  "message": "MFA is enabled",
+  "available_methods": [
+    {
+      "name": "qrcode",
+      "url": "https://accounts.sonataproject.com/authentication/mfa/login?method=qrcode"
     },
-    "mfa_checker_url": {
-      "href": "https://sonataproject.com/api/v1/auth/mfa/check"
+    {
+      "name": "email",
+      "url": "https://accounts.sonataproject.com/authentication/mfa/login?method=email"
+    },
+    {
+      "name": "mobile_app",
+      "url": "https://accounts.sonataproject.com/authentication/mfa/login?method=mobile"
+    },
+    {
+      "name": "totp",
+      "url": "https://accounts.sonataproject.com/authentication/login/mfa?method=totp"
     }
-  }
+  ],
+  "session_id": "a1b2c3",
+  "expires_in": 3600
 }

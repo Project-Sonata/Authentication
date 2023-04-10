@@ -2,14 +2,18 @@ package com.odeyalo.sonata.authentication.testing.faker;
 
 import com.github.javafaker.Faker;
 import com.odeyalo.sonata.authentication.entity.User;
+import com.odeyalo.sonata.authentication.entity.settings.UserSettings;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
+
+import java.util.function.Consumer;
 
 public class UserFaker {
     private Long id;
     private String email;
     private String password;
     private boolean active;
+    private UserSettings userSettings;
     private Faker faker = new Faker();
 
     public UserFaker() {
@@ -73,12 +77,39 @@ public class UserFaker {
         return this;
     }
 
+    public UserFaker overrideUserSettings(UserSettings settings) {
+        this.userSettings = settings;
+        return this;
+    }
+
     public User get() {
-        return User.builder()
+        User user = User.builder()
                 .id(id)
                 .email(email)
                 .password(password)
+                .userSettings(userSettings)
                 .active(active)
                 .build();
+
+        if (userSettings == null) {
+            UserSettings emptySettings = UserSettings.empty(user);
+            user.setUserSettings(emptySettings);
+        }
+        return user;
+    }
+
+    /**
+     * Build the user and modifies the UserSettings
+     * @param modifier - modifier to customize UserSettings
+     * @return - user entity
+     */
+    public User get(Consumer<UserSettings> modifier) {
+        User user = get();
+        if (userSettings == null) {
+            userSettings = UserSettings.empty(user);
+        }
+        modifier.accept(userSettings);
+        user.setUserSettings(userSettings);
+        return user;
     }
 }

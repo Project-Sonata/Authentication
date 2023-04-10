@@ -6,6 +6,8 @@ import com.odeyalo.sonata.authentication.service.sender.MailMessage;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import static com.odeyalo.sonata.authentication.support.email.message.EmailMessageTypeCode.EMAIL_CONFIRMATION_MESSAGE;
+
 @Component
 public class PlainTextConfirmationCodeEmailMessageCreator implements ConfirmationCodeEmailMessageCreator {
     private String subject = "Confirmation code is here!";
@@ -16,7 +18,7 @@ public class PlainTextConfirmationCodeEmailMessageCreator implements Confirmatio
         Assert.notNull(code, "The confirmation code must not be null!");
         Assert.notNull(receiver, "Receiver must not be null!");
         String body = String.format(bodyFormat, code.getCode());
-        return new MailMessage(receiver, body.getBytes(), subject);
+        return new MailMessage(EMAIL_CONFIRMATION_MESSAGE, receiver, body.getBytes(), subject);
     }
 
     public void overrideSubject(String subject) {

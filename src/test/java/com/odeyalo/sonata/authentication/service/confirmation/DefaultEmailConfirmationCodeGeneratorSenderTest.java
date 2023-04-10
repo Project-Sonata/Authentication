@@ -16,6 +16,7 @@ import com.odeyalo.sonata.authentication.testing.stubs.NullConfirmationCodeEmail
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.odeyalo.sonata.authentication.support.email.message.EmailMessageTypeCode.EMAIL_CONFIRMATION_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -56,7 +57,9 @@ class DefaultEmailConfirmationCodeGeneratorSenderTest {
                 .exactlyEquals(String.format(bodyFormat, confirmationCode.getCode()))
                 .and()
                 .subject()
-                .exactlyEquals(subject);
+                .exactlyEquals(subject)
+                .and()
+                .type(EMAIL_CONFIRMATION_MESSAGE);
     }
 
 

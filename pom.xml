@@ -78,6 +78,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.odeyalo.sonata</groupId>
+            <artifactId>common</artifactId>
+            <version>0.0.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
             <version>1.7</version>

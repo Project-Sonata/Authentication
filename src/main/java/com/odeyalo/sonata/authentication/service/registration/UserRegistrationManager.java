@@ -1,11 +1,12 @@
 package com.odeyalo.sonata.authentication.service.registration;
 
-import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+
+import com.odeyalo.sonata.authentication.dto.request.AdvancedUserRegistrationInfo;
 
 public interface UserRegistrationManager {
     /**
      * Register the user in the system
      * @param info - provided info by user
      */
-    RegistrationResult registerUser(UserRegistrationInfo info);
+    RegistrationResult registerUser(AdvancedUserRegistrationInfo info);
 }

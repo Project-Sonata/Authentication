@@ -1,7 +1,7 @@
 package com.odeyalo.sonata.authentication.support.validation.step;
 
-import com.odeyalo.sonata.authentication.common.ErrorDetails;
-import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.common.ExtendedErrorDetails;
+import com.odeyalo.sonata.authentication.dto.request.AdvancedUserRegistrationInfo;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
 import com.odeyalo.sonata.authentication.support.validation.ValidationResult;
@@ -21,8 +21,8 @@ public class EmailAlreadyTakenCheckUserRegistrationInfoValidationStep implements
     }
 
     @Override
-    public ValidationResult validate(UserRegistrationInfo userRegistrationInfo) {
-        User user = userRepository.findUserByEmail(userRegistrationInfo.getEmail());
-        return user == null ? ValidationResult.success() : ValidationResult.failed(ErrorDetails.EMAIL_ALREADY_TAKEN);
+    public ValidationResult validate(AdvancedUserRegistrationInfo advancedUserRegistrationInfo) {
+        User user = userRepository.findUserByEmail(advancedUserRegistrationInfo.getEmail());
+        return user == null ? ValidationResult.success() : ValidationResult.failed(ExtendedErrorDetails.EMAIL_ALREADY_TAKEN);
     }
 }

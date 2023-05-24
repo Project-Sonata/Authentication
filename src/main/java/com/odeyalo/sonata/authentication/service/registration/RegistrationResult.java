@@ -1,6 +1,6 @@
 package com.odeyalo.sonata.authentication.service.registration;
 
-import com.odeyalo.sonata.authentication.common.ErrorDetails;
+import com.odeyalo.sonata.authentication.common.ExtendedErrorDetails;
 
 /**
  * Immutable class that stores info about registration
@@ -11,7 +11,7 @@ import com.odeyalo.sonata.authentication.common.ErrorDetails;
  * Using of constructor is not recommended and static methods should be used to create a new RegistrationResult
  */
 
-public record RegistrationResult(boolean success, RequiredAction action, ErrorDetails errorDetails) {
+public record RegistrationResult(boolean success, RequiredAction action, ExtendedErrorDetails errorDetails) {
 
     public RegistrationResult(boolean success, RequiredAction action) {
         this(success, action, null);
@@ -21,7 +21,7 @@ public record RegistrationResult(boolean success, RequiredAction action, ErrorDe
         return new RegistrationResult(success, action);
     }
 
-    public static RegistrationResult of(boolean success, RequiredAction action, ErrorDetails errorDetails) {
+    public static RegistrationResult of(boolean success, RequiredAction action, ExtendedErrorDetails errorDetails) {
         return new RegistrationResult(success, action, errorDetails);
     }
 
@@ -33,7 +33,7 @@ public record RegistrationResult(boolean success, RequiredAction action, ErrorDe
         return of(false, action);
     }
 
-    public static RegistrationResult failed(RequiredAction action, ErrorDetails errorDetails) {
+    public static RegistrationResult failed(RequiredAction action, ExtendedErrorDetails errorDetails) {
         return of(false, action, errorDetails);
     }
 

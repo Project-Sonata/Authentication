@@ -1,7 +1,7 @@
 package com.odeyalo.sonata.authentication.service.registration;
 
-import com.odeyalo.sonata.authentication.common.ErrorDetails;
-import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.common.ExtendedErrorDetails;
+import com.odeyalo.sonata.authentication.dto.request.AdvancedUserRegistrationInfo;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
 import com.odeyalo.sonata.authentication.testing.factory.UserRegistrationServiceTestingFactory;
@@ -13,9 +13,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDate;
-
-import static com.odeyalo.sonata.authentication.support.validation.ValidationResult.success;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,7 +40,7 @@ class EmailConfirmationUserRegistrationServiceTest {
                 .overrideEmailConfirmationCodeGeneratorSender(senderSpy)
                 .build();
 
-        UserRegistrationInfo info = UserRegistrationInfoFaker.create()
+        AdvancedUserRegistrationInfo info = UserRegistrationInfoFaker.create()
                 .overrideEmail(email)
                 .overridePassword(password)
                 .get();
@@ -73,13 +70,13 @@ class EmailConfirmationUserRegistrationServiceTest {
                 .overrideUserRepository(userRepository)
                 .build();
 
-        UserRegistrationInfo info = UserRegistrationInfoFaker.create().get();
+        AdvancedUserRegistrationInfo info = UserRegistrationInfoFaker.create().get();
         // When
         RegistrationResult registrationResult = registrationService.registerUser(info);
         // Then
         assertFalse(registrationResult.success(), "If any error was occurred during saving, then false must be returned!");
         assertEquals(RegistrationResult.RequiredAction.DO_NOTHING, registrationResult.action(), "RequiredAction.DO_NOTHING must be returned!");
-        assertEquals(ErrorDetails.SERVER_ERROR, registrationResult.errorDetails(), "ErrorDetails.SERVER_ERROR must be returned if the saving operation cannot be performed because repository throws an exception!");
+        assertEquals(ExtendedErrorDetails.SERVER_ERROR, registrationResult.errorDetails(), "ErrorDetails.SERVER_ERROR must be returned if the saving operation cannot be performed because repository throws an exception!");
     }
 
 
@@ -95,14 +92,14 @@ class EmailConfirmationUserRegistrationServiceTest {
         UserRepository repo = builder.getUserRepository();
         EmailConfirmationUserRegistrationService registrationService = builder.build();
 
-        UserRegistrationInfo info = UserRegistrationInfoFaker.create().get();
+        AdvancedUserRegistrationInfo info = UserRegistrationInfoFaker.create().get();
 
         // when
         RegistrationResult registrationResult = registrationService.registerUser(info);
         // then
         assertFalse(registrationResult.success(), "Registration result must be false, since exception was thrown");
         assertEquals(RegistrationResult.RequiredAction.DO_NOTHING, registrationResult.action(), "RequiredAction.DO_NOTHING must be returned if error was occurred on server side");
-        assertEquals(ErrorDetails.SERVER_ERROR, registrationResult.errorDetails(), "SERVER_ERROR must be returned if application is unable to send the email message");
+        assertEquals(ExtendedErrorDetails.SERVER_ERROR, registrationResult.errorDetails(), "SERVER_ERROR must be returned if application is unable to send the email message");
 
         User user = repo.findUserByEmail(info.getEmail());
 

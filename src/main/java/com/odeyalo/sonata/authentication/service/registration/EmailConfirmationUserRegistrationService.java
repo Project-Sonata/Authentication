@@ -1,7 +1,7 @@
 package com.odeyalo.sonata.authentication.service.registration;
 
-import com.odeyalo.sonata.authentication.common.ErrorDetails;
-import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.common.ExtendedErrorDetails;
+import com.odeyalo.sonata.authentication.dto.request.AdvancedUserRegistrationInfo;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.exceptions.MessageSendingFailedException;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
@@ -33,7 +33,7 @@ public class EmailConfirmationUserRegistrationService implements UserRegistratio
     }
 
     @Override
-    public RegistrationResult registerUser(UserRegistrationInfo info) {
+    public RegistrationResult registerUser(AdvancedUserRegistrationInfo info) {
         User user = createUser(info);
         ResultWrapper wrapper = saveUser(user);
 
@@ -54,7 +54,7 @@ public class EmailConfirmationUserRegistrationService implements UserRegistratio
         } catch (MessageSendingFailedException ex) {
             this.logger.error("Failed to send the confirmation code to: {}", user.getEmail());
             onError.accept(wrapper);
-            return RegistrationResult.failed(RegistrationResult.RequiredAction.DO_NOTHING, ErrorDetails.SERVER_ERROR);
+            return RegistrationResult.failed(RegistrationResult.RequiredAction.DO_NOTHING, ExtendedErrorDetails.SERVER_ERROR);
         }
     }
 
@@ -65,7 +65,7 @@ public class EmailConfirmationUserRegistrationService implements UserRegistratio
     /**
      * Save the user in repository
      * @param user - user to save
-     * @return - {@link RegistrationResult#success()})} if everything is okay, {@link RegistrationResult#failed(RegistrationResult.RequiredAction, ErrorDetails)}) otherwise
+     * @return - {@link RegistrationResult#success()})} if everything is okay, {@link RegistrationResult#failed(RegistrationResult.RequiredAction, ExtendedErrorDetails)}) otherwise
      */
     private ResultWrapper saveUser(User user) {
         try {
@@ -75,12 +75,12 @@ public class EmailConfirmationUserRegistrationService implements UserRegistratio
         } catch (Exception e) {
             this.logger.error("The error occurred during user saving.", e);
             // We already validate the UserRegistrationInfo in the UserRegistrationManager and if error occurs we don't know what type of the error, so we return SERVER_ERROR
-            RegistrationResult result = RegistrationResult.failed(RegistrationResult.RequiredAction.DO_NOTHING, ErrorDetails.SERVER_ERROR);
+            RegistrationResult result = RegistrationResult.failed(RegistrationResult.RequiredAction.DO_NOTHING, ExtendedErrorDetails.SERVER_ERROR);
             return ResultWrapper.of(null, result);
         }
     }
 
-    private User createUser(UserRegistrationInfo info) {
+    private User createUser(AdvancedUserRegistrationInfo info) {
         String password = passwordEncoder.encode(info.getPassword());
         return User
                 .builder()

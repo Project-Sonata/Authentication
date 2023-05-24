@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class LoginCredentials {
+public class LoginCredentials extends com.odeyalo.sonata.common.authentication.dto.LoginCredentials {
     @JsonProperty(required = true)
     private String email;
     @JsonProperty(required = true)

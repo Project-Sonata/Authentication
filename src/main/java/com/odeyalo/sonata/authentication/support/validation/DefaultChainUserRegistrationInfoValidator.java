@@ -1,15 +1,11 @@
 package com.odeyalo.sonata.authentication.support.validation;
 
-import com.odeyalo.sonata.authentication.common.ErrorDetails;
-import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.dto.request.AdvancedUserRegistrationInfo;
 import com.odeyalo.sonata.authentication.support.validation.step.UserRegistrationInfoValidationStep;
-import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.stereotype.Component;
 
-import java.util.regex.Pattern;
-
 /**
- * Default {@link UserRegistrationInfoValidator} implementation, that uses {@link UserRegistrationInfoValidationStep} to validate the {@link UserRegistrationInfo}
+ * Default {@link UserRegistrationInfoValidator} implementation, that uses {@link UserRegistrationInfoValidationStep} to validate the {@link AdvancedUserRegistrationInfo}
  */
 @Component
 public class DefaultChainUserRegistrationInfoValidator implements UserRegistrationInfoValidator {
@@ -20,7 +16,7 @@ public class DefaultChainUserRegistrationInfoValidator implements UserRegistrati
     }
 
     @Override
-    public ValidationResult validateInfo(UserRegistrationInfo info) {
+    public ValidationResult validateInfo(AdvancedUserRegistrationInfo info) {
         for (UserRegistrationInfoValidationStep validationStep : container.getSteps()) {
             ValidationResult result = validationStep.validate(info);
             if (!result.isSuccess()) {

@@ -1,7 +1,7 @@
 package com.odeyalo.sonata.authentication.service.registration;
 
-import com.odeyalo.sonata.authentication.common.ErrorDetails;
-import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.common.ExtendedErrorDetails;
+import com.odeyalo.sonata.authentication.dto.request.AdvancedUserRegistrationInfo;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
 import com.odeyalo.sonata.authentication.testing.factory.UserRegistrationManagerTestingFactory;
@@ -27,7 +27,7 @@ class DefaultUserRegistrationManagerTest {
                 .overrideRegistrationService(service)
                 .build();
 
-        UserRegistrationInfo info = UserRegistrationInfoFaker.create().get();
+        AdvancedUserRegistrationInfo info = UserRegistrationInfoFaker.create().get();
         // When
         RegistrationResult result = defaultUserRegistrationManager.registerUser(info);
 
@@ -50,14 +50,14 @@ class DefaultUserRegistrationManagerTest {
                 .createDefault();
         String invalidPassword = "odeyaloissad";
 
-        UserRegistrationInfo info = UserRegistrationInfoFaker.create()
+        AdvancedUserRegistrationInfo info = UserRegistrationInfoFaker.create()
                 .overridePassword(invalidPassword)
                 .get();
 
         RegistrationResult result = defaultUserRegistrationManager.registerUser(info);
 
         assertFalse(result.success());
-        assertEquals(ErrorDetails.INVALID_PASSWORD, result.errorDetails());
+        assertEquals(ExtendedErrorDetails.INVALID_PASSWORD, result.errorDetails());
     }
 
     @Test

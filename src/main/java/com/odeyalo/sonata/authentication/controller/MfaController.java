@@ -1,9 +1,7 @@
 package com.odeyalo.sonata.authentication.controller;
 
 import com.odeyalo.sonata.authentication.controller.support.DataRequestAssociationService;
-import com.odeyalo.sonata.authentication.dto.request.ConfirmationCodeData;
-import com.odeyalo.sonata.authentication.dto.response.GenericMfaAuthenticationMethodInfoResponse;
-import com.odeyalo.sonata.authentication.dto.response.MfaConfirmationSubmissionResultResponse;
+import com.odeyalo.sonata.authentication.dto.response.ExtendedMfaConfirmationSubmissionResultResponse;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.exceptions.MalformedLoginSessionException;
 import com.odeyalo.sonata.authentication.exceptions.MissingConfirmationCodeValueException;
@@ -13,6 +11,8 @@ import com.odeyalo.sonata.authentication.service.mfa.MfaMethodInfo;
 import com.odeyalo.sonata.authentication.service.mfa.handler.MfaMethodHandler;
 import com.odeyalo.sonata.authentication.service.mfa.handler.MfaMethodHandlerFactory;
 import com.odeyalo.sonata.authentication.support.converter.dto.EmailMfaMethodInfoConverter;
+import com.odeyalo.sonata.common.authentication.dto.request.ConfirmationCodeData;
+import com.odeyalo.sonata.common.authentication.dto.response.GenericMfaAuthenticationMethodInfoResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -74,7 +74,7 @@ public class MfaController {
             throw new MalformedLoginSessionException(String.format("Session does not contain required element: %s", MFA_METHOD_KEY));
         }
         boolean submissionResult = handler.checkSubmission(MfaConfirmationSubmission.of(user, data.getCode()));
-        MfaConfirmationSubmissionResultResponse result = new MfaConfirmationSubmissionResultResponse(submissionResult, user);
+        ExtendedMfaConfirmationSubmissionResultResponse result = ExtendedMfaConfirmationSubmissionResultResponse.of(submissionResult, user);
 
         return ResponseEntity.status(submissionResult ? HttpStatus.OK : HttpStatus.BAD_REQUEST)
                 .body(result);

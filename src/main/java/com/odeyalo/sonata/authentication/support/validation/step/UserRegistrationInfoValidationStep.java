@@ -1,9 +1,9 @@
 package com.odeyalo.sonata.authentication.support.validation.step;
 
-import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.dto.request.AdvancedUserRegistrationInfo;
 
 /**
- * Interface to validate the {@link UserRegistrationInfo} by some rule
+ * Interface to validate the {@link AdvancedUserRegistrationInfo} by some rule
  */
-public interface UserRegistrationInfoValidationStep extends ValidationStep<UserRegistrationInfo> {
+public interface UserRegistrationInfoValidationStep extends ValidationStep<AdvancedUserRegistrationInfo> {
 }

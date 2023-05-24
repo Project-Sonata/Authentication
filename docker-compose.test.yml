@@ -12,16 +12,16 @@ services:
         condition: service_healthy
     env_file:
       - test-env-variables.env
+    environment:
+      ACCESS_TOKEN: ${ACCESS_TOKEN}
   db:
     image: 'postgres:13.1-alpine'
     container_name: db
     ports:
       - "5432:5432"
-    env_file:
-      test-env-variables.env
     environment:
-      ACCESS_TOKEN: ${ACCESS_TOKEN}
-
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s

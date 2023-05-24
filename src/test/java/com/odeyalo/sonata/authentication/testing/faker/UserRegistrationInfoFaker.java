@@ -1,7 +1,7 @@
 package com.odeyalo.sonata.authentication.testing.faker;
 
 import com.github.javafaker.Faker;
-import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.dto.request.AdvancedUserRegistrationInfo;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
@@ -14,7 +14,7 @@ import java.time.ZoneId;
 import java.util.Date;
 
 /**
- * Class to create a fakes of {@link UserRegistrationInfo}
+ * Class to create a fakes of {@link AdvancedUserRegistrationInfo}
  */
 @Getter
 @ToString
@@ -75,8 +75,8 @@ public class UserRegistrationInfoFaker {
     }
 
 
-    public UserRegistrationInfo get() {
-        UserRegistrationInfo info = UserRegistrationInfo
+    public AdvancedUserRegistrationInfo get() {
+        AdvancedUserRegistrationInfo info = AdvancedUserRegistrationInfo
                 .builder()
                 .email(email)
                 .password(password)

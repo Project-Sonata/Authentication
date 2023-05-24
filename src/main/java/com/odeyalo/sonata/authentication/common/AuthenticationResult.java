@@ -19,7 +19,7 @@ public class AuthenticationResult {
     private boolean success;
     private User user;
     // Used if the application cannot perform authentication
-    private ErrorDetails errorDetails;
+    private ExtendedErrorDetails errorDetails;
     private Type type;
     private Set<UserMfaSettings.MfaType> supportedMfaTypes;
 
@@ -36,7 +36,7 @@ public class AuthenticationResult {
         return new AuthenticationResult(true, user, null, type, user.getUserSettings().getUserMfaSettings().getAuthorizedMfaTypes());
     }
 
-    public static AuthenticationResult failed(ErrorDetails details) {
+    public static AuthenticationResult failed(ExtendedErrorDetails details) {
         return new AuthenticationResult(false, null, details, Type.FAILED, null);
     }
 
@@ -58,7 +58,7 @@ public class AuthenticationResult {
 
     public static final class PossibleErrors {
         // Possible errors that can be occurred
-        public static final ErrorDetails EMAIL_CONFIRMATION_REQUIRED = ErrorDetails.of("email_confirmation_required", "The account exists but need to be activated", "Activate the account using confirmation code");
-        public static final ErrorDetails INVALID_CREDENTIALS = ErrorDetails.of("invalid_credentials", "Invalid credentials were provided", "Check your credentials again");
+        public static final ExtendedErrorDetails EMAIL_CONFIRMATION_REQUIRED = ExtendedErrorDetails.of("email_confirmation_required", "The account exists but need to be activated", "Activate the account using confirmation code");
+        public static final ExtendedErrorDetails INVALID_CREDENTIALS = ExtendedErrorDetails.of("invalid_credentials", "Invalid credentials were provided", "Check your credentials again");
     }
 }

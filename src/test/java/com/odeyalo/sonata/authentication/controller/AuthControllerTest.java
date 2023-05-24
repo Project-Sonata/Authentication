@@ -1,16 +1,13 @@
 package com.odeyalo.sonata.authentication.controller;
 
 import com.odeyalo.sonata.authentication.JsonTestUtils;
-import com.odeyalo.sonata.authentication.common.ErrorDetails;
+import com.odeyalo.sonata.authentication.common.ExtendedErrorDetails;
 import com.odeyalo.sonata.authentication.common.LoginCredentials;
 import com.odeyalo.sonata.authentication.common.AuthenticationResult;
-import com.odeyalo.sonata.authentication.dto.UserInfo;
-import com.odeyalo.sonata.authentication.dto.error.ApiErrorDetailsInfo;
-import com.odeyalo.sonata.authentication.dto.request.ConfirmationCodeData;
-import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
-import com.odeyalo.sonata.authentication.dto.response.AuthenticationResultResponse;
+import com.odeyalo.sonata.authentication.dto.ExtendedUserInfo;
+import com.odeyalo.sonata.authentication.dto.request.AdvancedUserRegistrationInfo;
+import com.odeyalo.sonata.authentication.dto.response.ExtendedAuthenticationResultResponse;
 import com.odeyalo.sonata.authentication.dto.response.EmailConfirmationStatusResponseDto;
-import com.odeyalo.sonata.authentication.dto.response.UserRegistrationConfirmationResponseDto;
 import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.repository.ConfirmationCodeRepository;
@@ -20,6 +17,11 @@ import com.odeyalo.sonata.authentication.repository.UserRepository;
 import com.odeyalo.sonata.authentication.testing.factory.UserEntityTestingFactory;
 import com.odeyalo.sonata.authentication.testing.faker.ConfirmationCodeFaker;
 import com.odeyalo.sonata.authentication.testing.faker.UserFaker;
+import com.odeyalo.sonata.common.authentication.dto.UserInfo;
+import com.odeyalo.sonata.common.authentication.dto.request.ConfirmationCodeData;
+import com.odeyalo.sonata.common.authentication.dto.response.AuthenticationResultResponse;
+import com.odeyalo.sonata.common.authentication.dto.response.UserRegistrationConfirmationResponseDto;
+import com.odeyalo.sonata.common.shared.ApiErrorDetailsInfo;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -86,7 +88,7 @@ class AuthControllerTest {
         @DisplayName("Should register the user in the system and return HTTP 200 OK with JSON body")
         void shouldRegisterUser_andExceptHttp200() throws Exception {
             // given
-            UserRegistrationInfo registrationInfo = getValidUserRegistrationInfo();
+            AdvancedUserRegistrationInfo registrationInfo = getValidUserRegistrationInfo();
 
             String requestBody = JsonTestUtils.convertToJson(registrationInfo);
 
@@ -129,7 +131,7 @@ class AuthControllerTest {
         @DisplayName("Register the user with invalid registration info that contains invalid email and expect HTTP 400 with INVALID_EMAIL error")
         void registerUserWithInvalidEmail_andExceptHttp400WithInvalidEmailError() throws Exception {
             // given
-            UserRegistrationInfo info = getValidUserRegistrationInfo();
+            AdvancedUserRegistrationInfo info = getValidUserRegistrationInfo();
             info.setEmail("invalidemail");
 
             long beforeRequestCount = userRepository.count();
@@ -152,7 +154,7 @@ class AuthControllerTest {
             assertEquals(beforeRequestCount, afterRequestCount, "Count must be same if user was not saved");
             assertEquals(HttpStatus.BAD_REQUEST, httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
             assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
-            assertEquals(errorInfo.getErrorDetails(), ErrorDetails.INVALID_EMAIL, "If email is incorrect, then invalid_email error message must be returned");
+            assertEquals(errorInfo.getErrorDetails(), ExtendedErrorDetails.INVALID_EMAIL, "If email is incorrect, then invalid_email error message must be returned");
 
         }
 
@@ -160,7 +162,7 @@ class AuthControllerTest {
         @DisplayName("Register the user with invalid registration info that contains already used email and expect HTTP 400 with EMAIL_ALREADY_TAKEN error")
         void registerUserWithTakenEmail_andExceptHttp400WithEmailAlreadyTakenError() throws Exception {
             // given
-            UserRegistrationInfo info = getValidUserRegistrationInfo();
+            AdvancedUserRegistrationInfo info = getValidUserRegistrationInfo();
             info.setEmail(ALREADY_TAKEN_EMAIL);
             long beforeRequestCount = userRepository.count();
 
@@ -184,14 +186,14 @@ class AuthControllerTest {
             assertEquals(beforeRequestCount, afterRequestCount, "Count must be same if user was not saved");
             assertEquals(HttpStatus.BAD_REQUEST, httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
             assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
-            assertEquals(errorInfo.getErrorDetails(), ErrorDetails.EMAIL_ALREADY_TAKEN, "If email is already taken by other user, then email_already_taken error message must be returned");
+            assertEquals(errorInfo.getErrorDetails(), ExtendedErrorDetails.EMAIL_ALREADY_TAKEN, "If email is already taken by other user, then email_already_taken error message must be returned");
         }
 
         @Test
         @DisplayName("Register the user with invalid registration info that contains invalid email and expect HTTP 400 with INVALID_PASSWORD error")
         void registerUserWithInvalidPassword_andExceptHttp400WithInvalidPasswordError() throws Exception {
             // given
-            UserRegistrationInfo info = getValidUserRegistrationInfo();
+            AdvancedUserRegistrationInfo info = getValidUserRegistrationInfo();
             info.setPassword(INVALID_PASSWORD);
 
             long beforeRequestCount = userRepository.count();
@@ -216,7 +218,7 @@ class AuthControllerTest {
             assertEquals(beforeRequestCount, afterRequestCount, "Count must be same if user was not saved");
             assertEquals(HttpStatus.BAD_REQUEST, httpStatus, "If the user entered the wrong registration info, then HTTP 400 must be returned");
             assertNotNull(errorInfo.getErrorDetails(), "Error details must be not null and contain the detailed info about error");
-            assertEquals(ErrorDetails.INVALID_PASSWORD, errorInfo.getErrorDetails(), "If the password is incorrect, then invalid_password error must be returned");
+            assertEquals(ExtendedErrorDetails.INVALID_PASSWORD, errorInfo.getErrorDetails(), "If the password is incorrect, then invalid_password error must be returned");
         }
     }
 
@@ -233,7 +235,7 @@ class AuthControllerTest {
             ConfirmationCode confirmationCode = ConfirmationCodeFaker.withBody(validCodeValue).user(user).get();
             ((ConfirmationCodeRepository) confirmationCodeRepository).save(confirmationCode);
 
-            UserInfo expectedUserInfo = UserInfo.from(user);
+            ExtendedUserInfo expectedUserInfo = ExtendedUserInfo.from(user);
 
             ConfirmationCodeData data = new ConfirmationCodeData(validCodeValue);
             String json = JsonTestUtils.convertToJson(data);
@@ -249,7 +251,7 @@ class AuthControllerTest {
             // then
             Optional<User> optional = ((UserRepository) userRepository).findById(user.getId());
             EmailConfirmationStatusResponseDto responseDto = JsonTestUtils.convertToPojo(mvcResult, EmailConfirmationStatusResponseDto.class);
-            UserInfo userInfo = responseDto.getUserInfo();
+            ExtendedUserInfo userInfo = responseDto.getUserInfo();
 
             assertTrue(optional.isPresent(), "User must not be deleted after request!");
             User actualUser = optional.get();
@@ -277,7 +279,7 @@ class AuthControllerTest {
                     .andReturn();
             // then
             EmailConfirmationStatusResponseDto responseDto = JsonTestUtils.convertToPojo(mvcResult, EmailConfirmationStatusResponseDto.class);
-            UserInfo userInfo = responseDto.getUserInfo();
+            ExtendedUserInfo userInfo = responseDto.getUserInfo();
 
             assertFalse(responseDto.isConfirmed(), "If the code is invalid, then false must be returned in is_confirmed field");
             assertNotNull(responseDto.getMessage(), "Message should not be null");
@@ -301,7 +303,7 @@ class AuthControllerTest {
 
             User savedUser = ((UserRepository) userRepository).save(user);
 
-            UserInfo expectedUserInfo = UserInfo.from(savedUser);
+            UserInfo expectedUserInfo = UserInfo.of(String.valueOf(savedUser.getId()), savedUser.getEmail());
 
             LoginCredentials credentials = LoginCredentials.of(email, rawPassword);
             String content = JsonTestUtils.convertToJson(credentials);
@@ -335,7 +337,7 @@ class AuthControllerTest {
                     .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                     .andReturn();
             // then
-            AuthenticationResultResponse result = JsonTestUtils.convertToPojo(mvcResult, AuthenticationResultResponse.class);
+            ExtendedAuthenticationResultResponse result = JsonTestUtils.convertToPojo(mvcResult, ExtendedAuthenticationResultResponse.class);
 
             assertFalse(result.isSuccess(), "If credentials are incorrect, then 'false' should be returned as result!");
             assertNull(result.getUserInfo(), "If credentials are incorrect, then null should be returned as user info");
@@ -366,7 +368,7 @@ class AuthControllerTest {
                     .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                     .andReturn();
             // then
-            AuthenticationResultResponse result = JsonTestUtils.convertToPojo(mvcResult, AuthenticationResultResponse.class);
+            ExtendedAuthenticationResultResponse result = JsonTestUtils.convertToPojo(mvcResult, ExtendedAuthenticationResultResponse.class);
 
             assertFalse(result.isSuccess(), "If credentials are incorrect, then 'false' should be returned as result!");
             assertNull(result.getUserInfo(), "If credentials are incorrect, then null should be returned as user info");
@@ -395,7 +397,7 @@ class AuthControllerTest {
                     .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                     .andReturn();
             // then
-            AuthenticationResultResponse result = JsonTestUtils.convertToPojo(mvcResult, AuthenticationResultResponse.class);
+            ExtendedAuthenticationResultResponse result = JsonTestUtils.convertToPojo(mvcResult, ExtendedAuthenticationResultResponse.class);
             assertFalse(result.isSuccess(), "If credentials are correct, then 'false' should be returned as result!");
             assertNull(result.getUserInfo(), "If user is inactive, then null user info should be returned!");
             assertEquals(AuthenticationResult.PossibleErrors.EMAIL_CONFIRMATION_REQUIRED, result.getErrorDetails(), "If the user is activated but not activated, then AuthenticationResult.PossibleErrors.EMAIL_CONFIRMATION_REQUIRED error should be returned");
@@ -408,14 +410,14 @@ class AuthControllerTest {
         userRepository.deleteAll();
     }
 
-    private UserRegistrationInfo getValidUserRegistrationInfo() {
+    private AdvancedUserRegistrationInfo getValidUserRegistrationInfo() {
         String email = "odeyalo@gmail.com";
         String password = "mysupercoolpassword123";
         LocalDate birthdate = LocalDate.of(2002, 11, 23);
         String gender = "MALE";
         boolean notificationEnabled = true;
 
-        return UserRegistrationInfo.builder()
+        return AdvancedUserRegistrationInfo.builder()
                 .email(email)
                 .password(password)
                 .birthdate(birthdate)

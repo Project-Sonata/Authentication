@@ -6,4 +6,4 @@ WORKDIR sonata-authentication
 
 COPY . .
 
-ENTRYPOINT mvn install
+ENTRYPOINT mvn -s settings.xml install

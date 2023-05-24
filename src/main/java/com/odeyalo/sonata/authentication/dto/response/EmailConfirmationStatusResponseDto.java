@@ -3,10 +3,9 @@ package com.odeyalo.sonata.authentication.dto.response;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.odeyalo.sonata.authentication.dto.UserInfo;
+import com.odeyalo.sonata.authentication.dto.ExtendedUserInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Dto to return an answer about email confirmation status
@@ -19,7 +18,7 @@ public class EmailConfirmationStatusResponseDto {
     @JsonProperty("is_confirmed")
     private final boolean isConfirmed;
     @JsonProperty("user_info")
-    private final UserInfo userInfo;
+    private final ExtendedUserInfo userInfo;
     @JsonProperty("message")
     private final String message;
 
@@ -31,7 +30,7 @@ public class EmailConfirmationStatusResponseDto {
 
     public static final String SUCCESS_MESSAGE = "The email has been successfully confirmed";
 
-    public static EmailConfirmationStatusResponseDto confirmationSuccess(UserInfo userInfo) {
+    public static EmailConfirmationStatusResponseDto confirmationSuccess(ExtendedUserInfo userInfo) {
         return new EmailConfirmationStatusResponseDto(true, userInfo, SUCCESS_MESSAGE);
     }
 

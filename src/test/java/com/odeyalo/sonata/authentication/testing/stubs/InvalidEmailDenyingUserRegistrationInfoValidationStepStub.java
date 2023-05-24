@@ -1,7 +1,7 @@
 package com.odeyalo.sonata.authentication.testing.stubs;
 
-import com.odeyalo.sonata.authentication.common.ErrorDetails;
-import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.common.ExtendedErrorDetails;
+import com.odeyalo.sonata.authentication.dto.request.AdvancedUserRegistrationInfo;
 import com.odeyalo.sonata.authentication.support.validation.ValidationResult;
 import com.odeyalo.sonata.authentication.support.validation.step.UserRegistrationInfoValidationStep;
 
@@ -12,7 +12,7 @@ import com.odeyalo.sonata.authentication.support.validation.step.UserRegistratio
 public class InvalidEmailDenyingUserRegistrationInfoValidationStepStub implements UserRegistrationInfoValidationStep {
 
     @Override
-    public ValidationResult validate(UserRegistrationInfo userRegistrationInfo) {
-        return ValidationResult.failed(ErrorDetails.INVALID_EMAIL);
+    public ValidationResult validate(AdvancedUserRegistrationInfo advancedUserRegistrationInfo) {
+        return ValidationResult.failed(ExtendedErrorDetails.INVALID_EMAIL);
     }
 }

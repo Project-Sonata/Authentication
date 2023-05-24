@@ -2,10 +2,8 @@ package com.odeyalo.sonata.authentication.controller;
 
 import com.odeyalo.sonata.authentication.JsonTestUtils;
 import com.odeyalo.sonata.authentication.controller.support.DataRequestAssociationService;
-import com.odeyalo.sonata.authentication.dto.UserInfo;
-import com.odeyalo.sonata.authentication.dto.error.ApiErrorDetailsInfo;
-import com.odeyalo.sonata.authentication.dto.request.ConfirmationCodeData;
-import com.odeyalo.sonata.authentication.dto.response.MfaConfirmationSubmissionResultResponse;
+import com.odeyalo.sonata.authentication.dto.ExtendedUserInfo;
+import com.odeyalo.sonata.authentication.dto.response.ExtendedMfaConfirmationSubmissionResultResponse;
 import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.entity.settings.UserMfaSettings;
@@ -24,6 +22,8 @@ import com.odeyalo.sonata.authentication.service.sender.MailSender;
 import com.odeyalo.sonata.authentication.testing.assertations.MailMessageAssert;
 import com.odeyalo.sonata.authentication.testing.faker.ConfirmationCodeFaker;
 import com.odeyalo.sonata.authentication.testing.faker.UserFaker;
+import com.odeyalo.sonata.common.authentication.dto.request.ConfirmationCodeData;
+import com.odeyalo.sonata.common.shared.ApiErrorDetailsInfo;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -184,8 +184,8 @@ class MfaControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
         // then
-        MfaConfirmationSubmissionResultResponse response = JsonTestUtils.convertToPojo(result, MfaConfirmationSubmissionResultResponse.class);
-        assertEquals(UserInfo.from(user), response.getInfo(), "The info about user must be presented and valid!");
+        ExtendedMfaConfirmationSubmissionResultResponse response = JsonTestUtils.convertToPojo(result, ExtendedMfaConfirmationSubmissionResultResponse.class);
+        assertEquals(ExtendedUserInfo.from(user), response.getInfo(), "The info about user must be presented and valid!");
         assertTrue(response.isResult(), "If everything is okay, then true must be returned");
     }
 
@@ -212,7 +212,7 @@ class MfaControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andReturn();
         // then
-        MfaConfirmationSubmissionResultResponse response = JsonTestUtils.convertToPojo(result, MfaConfirmationSubmissionResultResponse.class);
+        ExtendedMfaConfirmationSubmissionResultResponse response = JsonTestUtils.convertToPojo(result, ExtendedMfaConfirmationSubmissionResultResponse.class);
         assertNull(response.getInfo(), "The info about user must be null if code is invalid!");
         assertFalse(response.isResult(), "If code is invalid, then false must be returned");
     }

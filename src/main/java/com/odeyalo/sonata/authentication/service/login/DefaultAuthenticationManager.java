@@ -1,7 +1,7 @@
 package com.odeyalo.sonata.authentication.service.login;
 
 import com.odeyalo.sonata.authentication.common.AuthenticationResult;
-import com.odeyalo.sonata.authentication.common.ErrorDetails;
+import com.odeyalo.sonata.authentication.common.ExtendedErrorDetails;
 import com.odeyalo.sonata.authentication.common.LoginCredentials;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
@@ -29,7 +29,7 @@ public class DefaultAuthenticationManager implements AuthenticationManager {
     public AuthenticationResult authenticate(LoginCredentials loginCredentials) {
         User user = userRepository.findUserByEmail(loginCredentials.getEmail());
         if (isUserInactive(user) || !(isPasswordMatches(loginCredentials, user))) {
-            ErrorDetails details = determineError(user);
+            ExtendedErrorDetails details = determineError(user);
             return AuthenticationResult.failed(details);
         }
         return additionalAuthenticationRequirementProvider.authenticate(user);
@@ -40,7 +40,7 @@ public class DefaultAuthenticationManager implements AuthenticationManager {
         return user.getUserSettings().getUserMfaSettings().isEnabled();
     }
 
-    private ErrorDetails determineError(User user) {
+    private ExtendedErrorDetails determineError(User user) {
         return user == null || user.isActive() ? AuthenticationResult.PossibleErrors.INVALID_CREDENTIALS : AuthenticationResult.PossibleErrors.EMAIL_CONFIRMATION_REQUIRED;
     }
 

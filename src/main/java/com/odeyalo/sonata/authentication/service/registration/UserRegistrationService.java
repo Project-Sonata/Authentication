@@ -1,6 +1,6 @@
 package com.odeyalo.sonata.authentication.service.registration;
 
-import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.dto.request.AdvancedUserRegistrationInfo;
 
 public interface UserRegistrationService {
     /**
@@ -8,5 +8,5 @@ public interface UserRegistrationService {
      * @param info - provided registration info by user
      * @return - {@link RegistrationResult#success()} if user was registered, {@link RegistrationResult#failed(RegistrationResult.RequiredAction)} otherwise
      */
-    RegistrationResult registerUser(UserRegistrationInfo info);
+    RegistrationResult registerUser(AdvancedUserRegistrationInfo info);
 }

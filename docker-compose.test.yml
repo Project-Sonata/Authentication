@@ -12,6 +12,8 @@ services:
         condition: service_healthy
     env_file:
       - test-env-variables.env
+    environment:
+      ACCESS_TOKEN: ${ACCESS_TOKEN}
   db:
     image: 'postgres:13.1-alpine'
     container_name: db

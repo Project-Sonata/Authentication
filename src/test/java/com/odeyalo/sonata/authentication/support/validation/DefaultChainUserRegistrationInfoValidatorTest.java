@@ -1,7 +1,7 @@
 package com.odeyalo.sonata.authentication.support.validation;
 
-import com.odeyalo.sonata.authentication.common.ErrorDetails;
-import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
+import com.odeyalo.sonata.authentication.common.ExtendedErrorDetails;
+import com.odeyalo.sonata.authentication.dto.request.AdvancedUserRegistrationInfo;
 import com.odeyalo.sonata.authentication.testing.factory.UserRegistrationInfoValidatorTestingFactory;
 import com.odeyalo.sonata.authentication.testing.stubs.EmailAlreadyTakenDenyingUserRegistrationInfoValidationStepStub;
 import org.junit.jupiter.api.DisplayName;
@@ -24,7 +24,7 @@ class DefaultChainUserRegistrationInfoValidatorTest {
     @DisplayName("Validate the correct info and expect success")
     void validateCorrectInfo_andExpectSuccess() {
         DefaultChainUserRegistrationInfoValidator validator = UserRegistrationInfoValidatorTestingFactory.createChainedValidator();
-        UserRegistrationInfo info = getValidUserRegistrationInfo();
+        AdvancedUserRegistrationInfo info = getValidUserRegistrationInfo();
         ValidationResult validationResult = validator.validateInfo(info);
         assertEquals(validationResult, ValidationResult.success());
     }
@@ -33,12 +33,12 @@ class DefaultChainUserRegistrationInfoValidatorTest {
     @DisplayName("Validate invalid email and expect INVALID_EMAIL error")
     void validateInvalidEmail_andExpectInvalidEmailError() {
         DefaultChainUserRegistrationInfoValidator validator = UserRegistrationInfoValidatorTestingFactory.createChainedValidator();
-        UserRegistrationInfo info = getValidUserRegistrationInfo();
+        AdvancedUserRegistrationInfo info = getValidUserRegistrationInfo();
         info.setEmail(INVALID_EMAIL);
         ValidationResult validationResult = validator.validateInfo(info);
 
         assertFalse(validationResult.isSuccess());
-        assertEquals(ErrorDetails.INVALID_EMAIL, validationResult.getErrorDetails());
+        assertEquals(ExtendedErrorDetails.INVALID_EMAIL, validationResult.getErrorDetails());
     }
 
 
@@ -48,34 +48,34 @@ class DefaultChainUserRegistrationInfoValidatorTest {
         DefaultChainUserRegistrationInfoValidator validator = UserRegistrationInfoValidatorTestingFactory.createChainedValidator(
                 new EmailAlreadyTakenDenyingUserRegistrationInfoValidationStepStub()
         );
-        UserRegistrationInfo info = getValidUserRegistrationInfo();
+        AdvancedUserRegistrationInfo info = getValidUserRegistrationInfo();
         info.setEmail(ALREADY_TAKEN_EMAIL_VALUE);
         ValidationResult validationResult = validator.validateInfo(info);
 
         assertFalse(validationResult.isSuccess());
-        assertEquals(ErrorDetails.EMAIL_ALREADY_TAKEN, validationResult.getErrorDetails());
+        assertEquals(ExtendedErrorDetails.EMAIL_ALREADY_TAKEN, validationResult.getErrorDetails());
     }
 
     @Test
     @DisplayName("Validate invalid password and expect INVALID_PASSWORD error")
     void validateInvalidPassword_andExpectInvalidPasswordError() {
         DefaultChainUserRegistrationInfoValidator validator = UserRegistrationInfoValidatorTestingFactory.createChainedValidator();
-        UserRegistrationInfo info = getValidUserRegistrationInfo();
+        AdvancedUserRegistrationInfo info = getValidUserRegistrationInfo();
         info.setPassword(INVALID_PASSWORD_VALUE);
         ValidationResult validationResult = validator.validateInfo(info);
 
         assertFalse(validationResult.isSuccess());
-        assertEquals(ErrorDetails.INVALID_PASSWORD, validationResult.getErrorDetails());
+        assertEquals(ExtendedErrorDetails.INVALID_PASSWORD, validationResult.getErrorDetails());
     }
 
-    private UserRegistrationInfo getValidUserRegistrationInfo() {
+    private AdvancedUserRegistrationInfo getValidUserRegistrationInfo() {
         String email = "odeyalo@gmail.com";
         String password = "mysupercoolpassword123";
         LocalDate birthdate = LocalDate.of(2002, 11, 23);
         String gender = "MALE";
         boolean notificationEnabled = true;
 
-        return UserRegistrationInfo.builder()
+        return AdvancedUserRegistrationInfo.builder()
                 .email(email)
                 .password(password)
                 .birthdate(birthdate)

@@ -3,18 +3,18 @@ package com.odeyalo.sonata.authentication.controller;
 import com.odeyalo.sonata.authentication.common.LoginCredentials;
 import com.odeyalo.sonata.authentication.common.AuthenticationResult;
 import com.odeyalo.sonata.authentication.controller.support.DataRequestAssociationService;
-import com.odeyalo.sonata.authentication.dto.UserInfo;
-import com.odeyalo.sonata.authentication.dto.error.ApiErrorDetailsInfo;
-import com.odeyalo.sonata.authentication.dto.request.ConfirmationCodeRequestDto;
-import com.odeyalo.sonata.authentication.dto.request.UserRegistrationInfo;
-import com.odeyalo.sonata.authentication.dto.response.AuthenticationResultResponse;
+import com.odeyalo.sonata.authentication.dto.ExtendedUserInfo;
+import com.odeyalo.sonata.authentication.dto.request.AdvancedUserRegistrationInfo;
+import com.odeyalo.sonata.authentication.dto.response.ExtendedAuthenticationResultResponse;
 import com.odeyalo.sonata.authentication.dto.response.EmailConfirmationStatusResponseDto;
-import com.odeyalo.sonata.authentication.dto.response.UserRegistrationConfirmationResponseDto;
 import com.odeyalo.sonata.authentication.service.confirmation.EmailConfirmationManager;
 import com.odeyalo.sonata.authentication.service.confirmation.support.ConfirmationCodeCheckResult;
 import com.odeyalo.sonata.authentication.service.login.AuthenticationManager;
 import com.odeyalo.sonata.authentication.service.registration.RegistrationResult;
 import com.odeyalo.sonata.authentication.service.registration.UserRegistrationManager;
+import com.odeyalo.sonata.common.authentication.dto.request.ConfirmationCodeRequestDto;
+import com.odeyalo.sonata.common.authentication.dto.response.UserRegistrationConfirmationResponseDto;
+import com.odeyalo.sonata.common.shared.ApiErrorDetailsInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +53,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> registerUser(@RequestBody UserRegistrationInfo info) {
+    public ResponseEntity<?> registerUser(@RequestBody AdvancedUserRegistrationInfo info) {
         RegistrationResult result = userRegistrationManager.registerUser(info);
 
         if (!result.success()) {
@@ -65,25 +65,25 @@ public class AuthController {
     }
 
     @PostMapping(value = "/confirm/email", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> confirmEmail(@RequestBody ConfirmationCodeRequestDto codeDto) {
+    public ResponseEntity<EmailConfirmationStatusResponseDto> confirmEmail(@RequestBody ConfirmationCodeRequestDto codeDto) {
         ConfirmationCodeCheckResult result = emailConfirmationManager.verifyCode(codeDto.getCodeValue());
 
         if (!result.isValid()) {
             EmailConfirmationStatusResponseDto dto = EmailConfirmationStatusResponseDto.confirmationFailed(INVALID_CONFIRMATION_CODE_MESSAGE);
             return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(dto);
         }
-        UserInfo userInfo = UserInfo.from(result.getUser());
+        ExtendedUserInfo userInfo = ExtendedUserInfo.from(result.getUser());
         EmailConfirmationStatusResponseDto dto = EmailConfirmationStatusResponseDto.confirmationSuccess(userInfo);
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(dto);
     }
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AuthenticationResultResponse> loginUser(@RequestBody LoginCredentials credentials,
-                                                                  HttpServletRequest request,
-                                                                  HttpServletResponse response) {
+    public ResponseEntity<ExtendedAuthenticationResultResponse> loginUser(@RequestBody LoginCredentials credentials,
+                                                                          HttpServletRequest request,
+                                                                          HttpServletResponse response) {
         AuthenticationResult result = authenticationManager.authenticate(credentials);
-        AuthenticationResultResponse body = AuthenticationResultResponse.from(result);
+        ExtendedAuthenticationResultResponse body = ExtendedAuthenticationResultResponse.from(result);
 
         associateIfNecessary(request, response, result);
 
@@ -98,7 +98,7 @@ public class AuthController {
         }
     }
 
-    private ResponseEntity<UserRegistrationConfirmationResponseDto> getSuccessResponse(UserRegistrationInfo info, UserRegistrationConfirmationResponseDto dto) {
+    private ResponseEntity<UserRegistrationConfirmationResponseDto> getSuccessResponse(AdvancedUserRegistrationInfo info, UserRegistrationConfirmationResponseDto dto) {
         Link link = linkTo(
                 methodOn(AuthController.class).confirmEmail(null))
                 .withRel(CONFIRMATION_URL_REL);

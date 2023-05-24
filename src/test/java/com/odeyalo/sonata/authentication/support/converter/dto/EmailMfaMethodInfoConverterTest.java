@@ -1,12 +1,12 @@
 package com.odeyalo.sonata.authentication.support.converter.dto;
 
 import com.odeyalo.sonata.authentication.controller.MfaController;
-import com.odeyalo.sonata.authentication.dto.UserInfo;
-import com.odeyalo.sonata.authentication.dto.response.GenericMfaAuthenticationMethodInfoResponse;
+import com.odeyalo.sonata.authentication.dto.ExtendedUserInfo;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.exceptions.IllegalMfaMethodTypeException;
 import com.odeyalo.sonata.authentication.service.mfa.MfaMethodInfo;
 import com.odeyalo.sonata.authentication.testing.faker.UserFaker;
+import com.odeyalo.sonata.common.authentication.dto.response.GenericMfaAuthenticationMethodInfoResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -50,7 +50,7 @@ class EmailMfaMethodInfoConverterTest {
 
         assertThat(actual.getUserInfo())
                 .as("User info must be properly created!")
-                .isEqualTo(UserInfo.from(user));
+                .isEqualTo(ExtendedUserInfo.from(user));
 
         assertThat(actual.getContent())
                 .as("Content must be the same as provided!")

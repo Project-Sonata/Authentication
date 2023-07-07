@@ -2,6 +2,7 @@ package com.odeyalo.sonata.authentication.common;
 
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.entity.settings.UserMfaSettings;
+import com.odeyalo.sonata.common.authentication.AuthenticationErrorCodes;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -58,7 +59,7 @@ public class AuthenticationResult {
 
     public static final class PossibleErrors {
         // Possible errors that can be occurred
-        public static final ExtendedErrorDetails EMAIL_CONFIRMATION_REQUIRED = ExtendedErrorDetails.of("email_confirmation_required", "The account exists but need to be activated", "Activate the account using confirmation code");
-        public static final ExtendedErrorDetails INVALID_CREDENTIALS = ExtendedErrorDetails.of("invalid_credentials", "Invalid credentials were provided", "Check your credentials again");
+        public static final ExtendedErrorDetails EMAIL_CONFIRMATION_REQUIRED = ExtendedErrorDetails.of(AuthenticationErrorCodes.EMAIL_CONFIRMATION_REQUIRED, "The account exists but need to be activated", "Activate the account using confirmation code");
+        public static final ExtendedErrorDetails INVALID_CREDENTIALS = ExtendedErrorDetails.of(AuthenticationErrorCodes.INVALID_CREDENTIALS, "Invalid credentials were provided", "Check your credentials again");
     }
 }

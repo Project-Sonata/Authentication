@@ -16,4 +16,6 @@ public class ExtendedGenericMfaAuthenticationMethodInfoResponse extends GenericM
     public static ExtendedGenericMfaAuthenticationMethodInfoResponse of(ExtendedUserInfo userInfo, String type, String content, boolean requireWs) {
         return new ExtendedGenericMfaAuthenticationMethodInfoResponse(requireWs, type, userInfo, content);
     }
+
+    // A -> B -> C -> GenericMfaAuthenticationMethodInfoResponse
 }

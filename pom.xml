@@ -36,14 +36,11 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.cloud</groupId>-->
-        <!--            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.cloud</groupId>-->
-        <!--            <artifactId>spring-cloud-starter-openfeign</artifactId>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
 
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -82,8 +79,13 @@
 
         <dependency>
             <groupId>com.odeyalo.sonata</groupId>
-            <artifactId>common</artifactId>
-            <version>0.0.2</version>
+            <artifactId>suite</artifactId>
+            <version>0.0.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
         <dependency>
@@ -112,6 +114,33 @@
             <scope>test</scope>
         </dependency>
 
+<!--        //-->
+
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bom</artifactId>
+            <version>1.0.0</version>
+            <type>pom</type>
+        </dependency>
+
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/io.micrometer/micrometer-tracing-bridge-otel -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/io.opentelemetry/opentelemetry-exporter-zipkin -->
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-zipkin</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>

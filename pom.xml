@@ -79,8 +79,8 @@
 
         <dependency>
             <groupId>com.odeyalo.sonata</groupId>
-            <artifactId>common</artifactId>
-            <version>0.0.4</version>
+            <artifactId>suite</artifactId>
+            <version>0.0.5</version>
         </dependency>
 
         <dependency>

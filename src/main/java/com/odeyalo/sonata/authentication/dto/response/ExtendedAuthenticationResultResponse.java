@@ -6,6 +6,7 @@ import com.odeyalo.sonata.authentication.controller.MfaController;
 import com.odeyalo.sonata.authentication.dto.ExtendedUserInfo;
 import com.odeyalo.sonata.authentication.entity.settings.UserMfaSettings;
 import com.odeyalo.sonata.common.authentication.dto.AuthenticationProcessType;
+import com.odeyalo.sonata.common.authentication.dto.UserInfo;
 import com.odeyalo.sonata.common.authentication.dto.response.AuthenticationResultResponse;
 import com.odeyalo.sonata.common.shared.ErrorDetails;
 import lombok.*;
@@ -24,8 +25,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ExtendedAuthenticationResultResponse extends AuthenticationResultResponse {
 
-    public ExtendedAuthenticationResultResponse(boolean success, com.odeyalo.sonata.common.authentication.dto.UserInfo userInfo, AuthenticationProcessType type, Set<AuthenticationResultResponse.MfaTypeMethodInfo> supportedMfaTypes,
-                                                com.odeyalo.sonata.common.shared.ErrorDetails errorDetails) {
+    public ExtendedAuthenticationResultResponse(boolean success, UserInfo userInfo,
+                                                AuthenticationProcessType type,
+                                                Set<AuthenticationResultResponse.MfaTypeMethodInfo> supportedMfaTypes,
+                                                ErrorDetails errorDetails) {
         super(success, userInfo, type, supportedMfaTypes, errorDetails);
     }
 

@@ -57,7 +57,8 @@ public class AuthController {
         RegistrationResult result = userRegistrationManager.registerUser(info);
 
         if (!result.success()) {
-            return ResponseEntity.badRequest().body(new ApiErrorDetailsInfo(HttpStatus.BAD_REQUEST, result.errorDetails()));
+            return ResponseEntity.badRequest().body(new
+                    ApiErrorDetailsInfo(HttpStatus.BAD_REQUEST, result.errorDetails()));
         }
 
         UserRegistrationConfirmationResponseDto dto = new UserRegistrationConfirmationResponseDto(CONFIRMATION_CODE_WAS_SENT_MESSAGE);
@@ -86,7 +87,6 @@ public class AuthController {
         ExtendedAuthenticationResultResponse body = ExtendedAuthenticationResultResponse.from(result);
 
         associateIfNecessary(request, response, result);
-
         return ResponseEntity.status(body.isSuccess() ? HttpStatus.OK : HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(body);

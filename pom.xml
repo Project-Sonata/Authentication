@@ -80,7 +80,7 @@
         <dependency>
             <groupId>com.odeyalo.sonata</groupId>
             <artifactId>common</artifactId>
-            <version>0.0.2</version>
+            <version>0.0.4</version>
         </dependency>
 
         <dependency>
@@ -114,6 +114,33 @@
             <scope>test</scope>
         </dependency>
 
+<!--        //-->
+
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bom</artifactId>
+            <version>1.0.0</version>
+            <type>pom</type>
+        </dependency>
+
+        <dependency>
+            <groupId>io.micrometer</groupId>`
+            <artifactId>micrometer-tracing</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/io.micrometer/micrometer-tracing-bridge-otel -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/io.opentelemetry/opentelemetry-exporter-zipkin -->
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-zipkin</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>

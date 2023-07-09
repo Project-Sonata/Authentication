@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.authentication.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.odeyalo.sonata.common.authentication.dto.request.UserRegistrationInfo;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -11,7 +12,9 @@ import lombok.experimental.SuperBuilder;
 @Data
 @AllArgsConstructor
 @SuperBuilder
+@NoArgsConstructor
 public class AdvancedUserRegistrationInfo extends UserRegistrationInfo {
+    @JsonIgnore
     private String countryCode;
 }
 

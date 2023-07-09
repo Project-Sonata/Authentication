@@ -48,7 +48,7 @@ public class EventPublisherEmailConfirmationManager implements EmailConfirmation
     private void prepareAndPublishEvent(User user, AdvancedUserRegistrationInfo info) {
         UserRegisteredEventData eventData = UserRegisteredEventData.builder()
                 .email(info.getEmail())
-                .countryCode(info.getCountryCode())
+//                .countryCode(info.getCountryCode())
                 .birthdate(info.getBirthdate())
                 .enableNotification(info.isNotificationEnabled())
                 .gender(info.getGender())

@@ -10,10 +10,7 @@ import com.odeyalo.sonata.authentication.dto.response.ExtendedAuthenticationResu
 import com.odeyalo.sonata.authentication.dto.response.EmailConfirmationStatusResponseDto;
 import com.odeyalo.sonata.authentication.entity.ConfirmationCode;
 import com.odeyalo.sonata.authentication.entity.User;
-import com.odeyalo.sonata.authentication.repository.ConfirmationCodeRepository;
-import com.odeyalo.sonata.authentication.repository.JpaConfirmationCodeRepository;
-import com.odeyalo.sonata.authentication.repository.JpaSupportUserRepository;
-import com.odeyalo.sonata.authentication.repository.UserRepository;
+import com.odeyalo.sonata.authentication.repository.*;
 import com.odeyalo.sonata.authentication.support.kafka.KafkaMessageSender;
 import com.odeyalo.sonata.authentication.testing.factory.UserEntityTestingFactory;
 import com.odeyalo.sonata.authentication.testing.faker.ConfirmationCodeFaker;
@@ -63,6 +60,9 @@ class AuthControllerTest {
     private JpaSupportUserRepository userRepository;
     @Autowired
     private JpaConfirmationCodeRepository confirmationCodeRepository;
+
+    @Autowired
+    private AdvancedUserRegistrationInfoStore infoStore;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -239,7 +239,15 @@ class AuthControllerTest {
 
             ConfirmationCode confirmationCode = ConfirmationCodeFaker.withBody(validCodeValue).user(user).get();
             ((ConfirmationCodeRepository) confirmationCodeRepository).save(confirmationCode);
-
+            infoStore.save(
+                    AdvancedUserRegistrationInfo.builder()
+                            .email(user.getEmail())
+                            .birthdate(LocalDate.of(2000, 2, 3))
+                            .gender("MALE")
+                            .password("password")
+                            .notificationEnabled(false)
+                            .countryCode("JP")
+                            .build());
             ExtendedUserInfo expectedUserInfo = ExtendedUserInfo.from(user);
 
             ConfirmationCodeData data = new ConfirmationCodeData(validCodeValue);

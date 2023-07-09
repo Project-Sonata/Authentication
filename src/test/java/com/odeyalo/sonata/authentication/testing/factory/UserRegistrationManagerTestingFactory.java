@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.authentication.testing.factory;
 
+import com.odeyalo.sonata.authentication.repository.InMemoryAdvancedUserRegistrationInfoStore;
 import com.odeyalo.sonata.authentication.service.registration.DefaultUserRegistrationManager;
 import com.odeyalo.sonata.authentication.service.registration.UserRegistrationManager;
 import com.odeyalo.sonata.authentication.service.registration.UserRegistrationService;
@@ -35,7 +36,7 @@ public class UserRegistrationManagerTestingFactory {
         }
 
         public DefaultUserRegistrationManager build() {
-            return new DefaultUserRegistrationManager(validator, userRegistrationService);
+            return new DefaultUserRegistrationManager(validator, userRegistrationService, new InMemoryAdvancedUserRegistrationInfoStore());
         }
     }
 }

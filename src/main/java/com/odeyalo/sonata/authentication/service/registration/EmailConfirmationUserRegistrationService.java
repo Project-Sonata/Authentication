@@ -4,6 +4,7 @@ import com.odeyalo.sonata.authentication.common.ExtendedErrorDetails;
 import com.odeyalo.sonata.authentication.dto.request.AdvancedUserRegistrationInfo;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.exceptions.MessageSendingFailedException;
+import com.odeyalo.sonata.authentication.repository.AdvancedUserRegistrationInfoStore;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
 import com.odeyalo.sonata.authentication.service.confirmation.EmailConfirmationCodeGeneratorSender;
 import com.odeyalo.sonata.authentication.service.confirmation.EmailReceiver;
@@ -21,6 +22,7 @@ public class EmailConfirmationUserRegistrationService implements UserRegistratio
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailConfirmationCodeGeneratorSender confirmationCodeGeneratorSender;
+
     private final Logger logger = LoggerFactory.getLogger(EmailConfirmationUserRegistrationService.class);
 
     @Autowired

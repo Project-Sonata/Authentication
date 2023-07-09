@@ -14,6 +14,7 @@ import com.odeyalo.sonata.authentication.repository.ConfirmationCodeRepository;
 import com.odeyalo.sonata.authentication.repository.JpaConfirmationCodeRepository;
 import com.odeyalo.sonata.authentication.repository.JpaSupportUserRepository;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
+import com.odeyalo.sonata.authentication.support.kafka.KafkaMessageSender;
 import com.odeyalo.sonata.authentication.testing.factory.UserEntityTestingFactory;
 import com.odeyalo.sonata.authentication.testing.faker.ConfirmationCodeFaker;
 import com.odeyalo.sonata.authentication.testing.faker.UserFaker;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -50,6 +52,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "classpath:application-test.properties")
 class AuthControllerTest {
+
+    @MockBean
+    private KafkaMessageSender sender;
 
     @Autowired
     private MockMvc mockMvc;

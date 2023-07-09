@@ -12,6 +12,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 public class AdvancedUserRegistrationInfo extends UserRegistrationInfo {
+    private String countryCode;
 }
 
 

@@ -1,7 +1,9 @@
 package com.odeyalo.sonata.authentication.service.confirmation;
 
+import com.odeyalo.sonata.authentication.dto.request.AdvancedUserRegistrationInfo;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.exceptions.MessageSendingFailedException;
+import com.odeyalo.sonata.authentication.repository.AdvancedUserRegistrationInfoStore;
 import com.odeyalo.sonata.authentication.service.confirmation.support.ConfirmationCodeCheckResult;
 import com.odeyalo.sonata.authentication.support.event.publisher.EventPublisher;
 import com.odeyalo.sonata.suite.brokers.events.user.UserRegisteredEvent;
@@ -10,10 +12,12 @@ import com.odeyalo.sonata.suite.brokers.events.user.data.UserRegisteredEventData
 public class EventPublisherEmailConfirmationManager implements EmailConfirmationManager {
     private final EmailConfirmationManager delegate;
     private final EventPublisher eventPublisher;
+    private final AdvancedUserRegistrationInfoStore infoStore;
 
-    public EventPublisherEmailConfirmationManager(EmailConfirmationManager delegate, EventPublisher eventPublisher) {
+    public EventPublisherEmailConfirmationManager(EmailConfirmationManager delegate, EventPublisher eventPublisher, AdvancedUserRegistrationInfoStore infoStore) {
         this.delegate = delegate;
         this.eventPublisher = eventPublisher;
+        this.infoStore = infoStore;
     }
 
     @Override
@@ -29,11 +33,27 @@ public class EventPublisherEmailConfirmationManager implements EmailConfirmation
     @Override
     public ConfirmationCodeCheckResult verifyCode(String codeValue) {
         ConfirmationCodeCheckResult result = delegate.verifyCode(codeValue);
-        if (result.isValid()) {
-            User user = result.getUser();
-            UserRegisteredEventData data = UserRegisteredEventData.of(String.valueOf(user.getId()), user.getEmail());
-            eventPublisher.publishEvent(new UserRegisteredEvent(data));
+        if (!result.isValid()) {
+            return result;
         }
+        User user = result.getUser();
+        AdvancedUserRegistrationInfo info = infoStore.findByEmail(user.getEmail()).orElse(null);
+        if (info == null) {
+            throw new IllegalStateException("Missing the user registration info!");
+        }
+        prepareAndPublishEvent(user, info);
         return result;
+    }
+
+    private void prepareAndPublishEvent(User user, AdvancedUserRegistrationInfo info) {
+        UserRegisteredEventData eventData = UserRegisteredEventData.builder()
+                .email(info.getEmail())
+                .countryCode(info.getCountryCode())
+                .birthdate(info.getBirthdate())
+                .enableNotification(info.isNotificationEnabled())
+                .gender(info.getGender())
+                .id(String.valueOf(user.getId()))
+                .build();
+        eventPublisher.publishEvent(new UserRegisteredEvent(eventData));
     }
 }

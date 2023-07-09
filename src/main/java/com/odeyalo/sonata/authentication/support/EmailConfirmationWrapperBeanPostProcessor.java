@@ -1,5 +1,6 @@
 package com.odeyalo.sonata.authentication.support;
 
+import com.odeyalo.sonata.authentication.repository.AdvancedUserRegistrationInfoStore;
 import com.odeyalo.sonata.authentication.service.confirmation.EmailConfirmationManager;
 import com.odeyalo.sonata.authentication.service.confirmation.EventPublisherEmailConfirmationManager;
 import com.odeyalo.sonata.authentication.support.event.publisher.EventPublisher;
@@ -23,7 +24,8 @@ public class EmailConfirmationWrapperBeanPostProcessor implements BeanPostProces
         if (bean instanceof EmailConfirmationManager) {
             System.out.println("Wrapped the: " + bean);
             EventPublisher publisher = beanFactory.getBean(EventPublisher.class);
-            return new EventPublisherEmailConfirmationManager((EmailConfirmationManager) bean, publisher);
+            AdvancedUserRegistrationInfoStore store = beanFactory.getBean(AdvancedUserRegistrationInfoStore.class);
+            return new EventPublisherEmailConfirmationManager((EmailConfirmationManager) bean, publisher, store);
         }
         return bean;
     }

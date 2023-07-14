@@ -125,7 +125,7 @@
             <scope>test</scope>
         </dependency>
 
-<!--        //-->
+        <!--        //-->
 
         <dependency>
             <groupId>io.micrometer</groupId>
@@ -151,6 +151,12 @@
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-exporter-zipkin</artifactId>
             <version>1.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-contract-maven-plugin</artifactId>
+            <version>4.0.3</version>
         </dependency>
     </dependencies>
     <dependencyManagement>
@@ -179,7 +185,40 @@
                     </excludes>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-contract-maven-plugin</artifactId>
+                <version>4.0.3</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <testMode>EXPLICIT</testMode>
+                    <baseClassMappings>
+                        <baseClassMapping>
+                            <contractPackageRegex>.*password.*</contractPackageRegex>
+                            <baseClassFQN>
+                                com.odeyalo.sonata.authentication.testing.contract.PasswordChangeBaseController
+                            </baseClassFQN>
+                        </baseClassMapping>
+                    </baseClassMappings>
+
+                    <contractsRepositoryUrl>
+                        git://https://github.com/Project-Sonata/Sonata-Contracts.git
+                    </contractsRepositoryUrl>
+                    <failOnNoContracts>false</failOnNoContracts>
+                    <contractsMode>REMOTE</contractsMode>
+                    <contractsRepositoryUsername>${GITHUB_USERNAME}</contractsRepositoryUsername>
+                    <contractsRepositoryPassword>${GITHUB_PASSWORD}</contractsRepositoryPassword>
+
+                    <contractDependency>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>${project.artifactId}</artifactId>
+                    </contractDependency>
+                </configuration>
+            </plugin>
         </plugins>
+
+
     </build>
     <repositories>
         <repository>

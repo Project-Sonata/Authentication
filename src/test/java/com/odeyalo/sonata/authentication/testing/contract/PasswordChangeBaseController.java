@@ -5,12 +5,14 @@ import com.odeyalo.sonata.authentication.service.password.PasswordContainer;
 import com.odeyalo.sonata.authentication.service.password.PasswordUpdatingResult;
 import com.odeyalo.sonata.authentication.service.password.SecureUserPasswordUpdater;
 import com.odeyalo.sonata.common.shared.ErrorDetails;
+import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.contract.verifier.messaging.boot.AutoConfigureMessageVerifier;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.TestPropertySource;
@@ -32,8 +34,14 @@ public class PasswordChangeBaseController {
     @MockBean
     SecureUserPasswordUpdater updater;
 
+    @LocalServerPort
+    private int port;
+
     @BeforeEach
     void prepare() {
+
+        RestAssured.baseURI = "http://localhost:" + port;
+
         PasswordContainer validPasswordContainer = PasswordContainer.of(VALID_OLD_PASSWORD, VALID_NEW_PASSWORD);
         Mockito.when(updater.updatePassword(1, validPasswordContainer)).thenReturn(PasswordUpdatingResult.updated());
 

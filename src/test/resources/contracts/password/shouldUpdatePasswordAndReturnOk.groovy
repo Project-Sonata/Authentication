@@ -15,7 +15,7 @@ Contract.make {
         }
         body(
                 [
-                        "old_password": "old_password_123",
+                        "old_password": "old_password123",
                         "new_password": "neW_password123"
                 ]
         )

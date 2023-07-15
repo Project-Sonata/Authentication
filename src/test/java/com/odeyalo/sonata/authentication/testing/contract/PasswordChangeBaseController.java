@@ -52,7 +52,7 @@ public class PasswordChangeBaseController {
 
         PasswordContainer containerWithInvalidNewPassword = PasswordContainer.of(VALID_OLD_PASSWORD, INVALID_NEW_PASSWORD);
         Mockito.when(updater.updatePassword(1, containerWithInvalidNewPassword)).thenReturn(PasswordUpdatingResult.failed(ErrorDetails.of(
-                "invalid_new_password", "New password pattern is invalid", "Use correct pattern for new password"
+                "new_password_pattern_mismatch", "New password has invalid format", "Use correct format for password"
         )));
 
     }

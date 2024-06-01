@@ -13,7 +13,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -57,6 +56,7 @@ class EmailConfirmationUserRegistrationServiceTest {
         assertFalse(actualUser.isActive(), "If required action is CONFIRM_EMAIL, then user should be activated only after email confirmation");
         assertEquals(email, actualUser.getEmail(), "Email must be saved!");
         assertTrue(passwordEncoderSpy.matches(password, actualUser.getPassword()), "Raw password must be match encoded!");
+        assertNotNull(actualUser.getSonataId(), "Unique Sonata ID must be generated for user!");
 
         assertTrue(senderSpy.wasSent(), "EmailConfirmationUserRegistrationService must send the confirmation code to the email!");
     }

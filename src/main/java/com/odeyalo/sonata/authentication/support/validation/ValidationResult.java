@@ -21,4 +21,8 @@ public class ValidationResult {
     public static ValidationResult failed(ExtendedErrorDetails details) {
         return new ValidationResult(false, details);
     }
+
+    public boolean isFailed() {
+        return !isSuccess();
+    }
 }

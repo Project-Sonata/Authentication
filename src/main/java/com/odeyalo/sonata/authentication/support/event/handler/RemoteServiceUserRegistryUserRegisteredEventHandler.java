@@ -6,7 +6,9 @@ import com.odeyalo.sonata.common.user.dto.CreateUserPayloadDto.Gender;
 import com.odeyalo.sonata.suite.brokers.events.user.UserRegisteredEvent;
 import com.odeyalo.sonata.suite.brokers.events.user.data.UserRegisteredEventData;
 import org.apache.commons.lang3.EnumUtils;
+import org.springframework.stereotype.Component;
 
+@Component
 public final class RemoteServiceUserRegistryUserRegisteredEventHandler implements UserRegisteredEventHandler {
     private final RemoteUserCreationService userRegistrar;
 

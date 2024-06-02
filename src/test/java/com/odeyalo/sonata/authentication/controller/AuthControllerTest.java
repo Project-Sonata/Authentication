@@ -20,7 +20,9 @@ import com.odeyalo.sonata.common.authentication.dto.request.ConfirmationCodeData
 import com.odeyalo.sonata.common.authentication.dto.response.AuthenticationResultResponse;
 import com.odeyalo.sonata.common.authentication.dto.response.UserRegistrationConfirmationResponseDto;
 import com.odeyalo.sonata.common.shared.ApiErrorDetailsInfo;
+import com.odeyalo.sonata.suite.servlet.client.UserServiceClient;
 import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,17 +30,20 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
@@ -48,10 +53,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "classpath:application-test.properties")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AuthControllerTest {
 
     @MockBean
     private KafkaMessageSender sender;
+
+    @MockBean
+    private UserServiceClient userServiceClient;
 
     @Autowired
     private MockMvc mockMvc;
@@ -70,6 +79,12 @@ class AuthControllerTest {
     public static final String SIGNUP_ENDPOINT_NAME = "/auth/signup";
     public static final String EMAIL_CONFIRMATION_ENDPOINT_NAME = "/auth/confirm/email";
     public static final String LOGIN_ENDPOINT_NAME = "/auth/login";
+
+    @BeforeAll
+    void beforeAll() {
+        Mockito.when(userServiceClient.createUser(any()))
+                .thenReturn(ResponseEntity.created(URI.create("https://testing.com/user/123")).build());
+    }
 
     @Nested
     @TestInstance(value = TestInstance.Lifecycle.PER_CLASS)
@@ -228,7 +243,14 @@ class AuthControllerTest {
     }
 
     @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     class EmailConfirmationEndpointsAuthControllerTests {
+
+        @BeforeAll
+        void beforeAll() {
+            Mockito.when(userServiceClient.createUser(any()))
+                    .thenReturn(ResponseEntity.created(URI.create("https://testing.com/user/123")).build());
+        }
 
         @Test
         @DisplayName("Send valid email confirmation code and expect HTTP 200 OK with JSON body that contains info about user and authentication")

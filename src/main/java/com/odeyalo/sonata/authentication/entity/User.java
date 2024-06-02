@@ -2,10 +2,7 @@ package com.odeyalo.sonata.authentication.entity;
 
 import com.odeyalo.sonata.authentication.entity.settings.UserSettings;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.NaturalId;
 
 import java.util.UUID;
@@ -24,6 +21,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+    @Column(name = "sonata_id", nullable = false, unique = true)
+    private String sonataId;
     @Column(name = "email", nullable = false, unique = true)
     private String email;
     @Column(name = "password", nullable = false, length = 3000)
@@ -31,6 +30,7 @@ public class User {
     @Column(name = "is_activated", nullable = false)
     private boolean active;
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Exclude
     private UserSettings userSettings;
     @NaturalId
     private String naturalId;

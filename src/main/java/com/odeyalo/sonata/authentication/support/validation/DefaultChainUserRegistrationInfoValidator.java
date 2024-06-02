@@ -17,16 +17,11 @@ public class DefaultChainUserRegistrationInfoValidator implements UserRegistrati
 
     @Override
     public ValidationResult validateInfo(AdvancedUserRegistrationInfo info) {
-        for (UserRegistrationInfoValidationStep validationStep : container.getSteps()) {
-            ValidationResult result = validationStep.validate(info);
-            if (!result.isSuccess()) {
-                return result;
-            }
-        }
-        return ValidationResult.success();
-    }
-
-    public UserRegistrationInfoValidationStepRegistry getContainer() {
-        return container;
+        return container.getSteps()
+                .stream()
+                .map(it -> it.validate(info))
+                .filter(ValidationResult::isFailed)
+                .findFirst()
+                .orElse(ValidationResult.success());
     }
 }

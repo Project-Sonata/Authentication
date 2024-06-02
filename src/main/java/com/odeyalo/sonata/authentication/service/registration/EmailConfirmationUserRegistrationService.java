@@ -4,11 +4,11 @@ import com.odeyalo.sonata.authentication.common.ExtendedErrorDetails;
 import com.odeyalo.sonata.authentication.dto.request.AdvancedUserRegistrationInfo;
 import com.odeyalo.sonata.authentication.entity.User;
 import com.odeyalo.sonata.authentication.exceptions.MessageSendingFailedException;
-import com.odeyalo.sonata.authentication.repository.AdvancedUserRegistrationInfoStore;
 import com.odeyalo.sonata.authentication.repository.UserRepository;
 import com.odeyalo.sonata.authentication.service.confirmation.EmailConfirmationCodeGeneratorSender;
 import com.odeyalo.sonata.authentication.service.confirmation.EmailReceiver;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,9 +44,7 @@ public class EmailConfirmationUserRegistrationService implements UserRegistratio
             return wrapper.result();
         }
 
-        return tryToSendOr(user, wrapper, (resultWrapper) -> {
-            userRepository.deleteById(resultWrapper.user().getId());
-        });
+        return tryToSendOr(user, wrapper, (resultWrapper) -> userRepository.deleteById(resultWrapper.user().getId()));
     }
 
     private RegistrationResult tryToSendOr(User user, ResultWrapper wrapper, Consumer<ResultWrapper> onError) {
@@ -89,6 +87,7 @@ public class EmailConfirmationUserRegistrationService implements UserRegistratio
                 .email(info.getEmail())
                 .password(password)
                 .active(false)
+                .sonataId(RandomStringUtils.randomAlphanumeric(22))
                 .build();
     }
 

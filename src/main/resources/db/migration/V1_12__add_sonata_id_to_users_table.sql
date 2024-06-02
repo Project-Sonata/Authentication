@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN IF NOT EXISTS sonata_id varchar(50) NOT NULL UNIQUE DEFAULT gen_random_uuid()

@@ -35,4 +35,8 @@ public class ConfirmationCodeCheckResult {
     public static ConfirmationCodeCheckResult of(boolean valid, String errorCode, String description) {
         return new ConfirmationCodeCheckResult(valid, null, errorCode, description);
     }
+
+    public boolean isInvalid() {
+        return !isValid();
+    }
 }

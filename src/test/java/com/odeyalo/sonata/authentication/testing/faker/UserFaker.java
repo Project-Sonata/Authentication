@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 
 public class UserFaker {
     private Long id;
+    private String sonataId;
     private String email;
     private String password;
     private boolean active;
@@ -25,11 +26,12 @@ public class UserFaker {
         initializeFakedValues();
     }
 
-    public UserFaker(Long id, String email, String password, boolean active) {
+    public UserFaker(Long id, String email, String password, boolean active, String sonataId) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.active = active;
+        this.sonataId = sonataId;
     }
 
     private void initializeFakedValues() {
@@ -37,6 +39,7 @@ public class UserFaker {
         this.email = faker.internet().emailAddress();
         this.password = faker.internet().password(8, 32);
         this.active = faker.random().nextBoolean();
+        this.sonataId = RandomStringUtils.randomAlphanumeric(22);
     }
 
     public static UserFaker create() {
@@ -49,7 +52,7 @@ public class UserFaker {
     }
 
     public static UserFaker from(Long id, String email, String password, boolean active) {
-        return new UserFaker(id, email, password, active);
+        return new UserFaker(id, email, password, active, RandomStringUtils.randomAlphanumeric(22));
     }
 
     public UserFaker overrideId(Long id) {
@@ -85,6 +88,7 @@ public class UserFaker {
     public User get() {
         User user = User.builder()
                 .id(id)
+                .sonataId(sonataId)
                 .email(email)
                 .password(password)
                 .userSettings(userSettings)

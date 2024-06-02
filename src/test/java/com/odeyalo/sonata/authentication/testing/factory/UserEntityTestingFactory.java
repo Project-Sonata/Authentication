@@ -1,6 +1,7 @@
 package com.odeyalo.sonata.authentication.testing.factory;
 
 import com.odeyalo.sonata.authentication.entity.User;
+import com.odeyalo.sonata.authentication.testing.faker.UserFaker;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -14,7 +15,9 @@ public class UserEntityTestingFactory {
     public static User createValid() {
         String existingEmail = "odeyalo@gmail.com";
 
-        return new User(idHolder.incrementAndGet(), existingEmail, "validpassword123", true);
+        return UserFaker.create().overrideId(idHolder.incrementAndGet())
+                .overrideEmail(existingEmail)
+                .get();
     }
 
     public static User createAndModify(Consumer<User> modifier) {

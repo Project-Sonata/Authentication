@@ -33,14 +33,16 @@ public class EventPublisherEmailConfirmationManager implements EmailConfirmation
     @Override
     public ConfirmationCodeCheckResult verifyCode(String codeValue) {
         ConfirmationCodeCheckResult result = delegate.verifyCode(codeValue);
-        if (!result.isValid()) {
+
+        if ( result.isInvalid() ) {
             return result;
         }
+
         User user = result.getUser();
-        AdvancedUserRegistrationInfo info = infoStore.findByEmail(user.getEmail()).orElse(null);
-        if (info == null) {
-            throw new IllegalStateException("Missing the user registration info!");
-        }
+
+        AdvancedUserRegistrationInfo info = infoStore.findByEmail(user.getEmail())
+                .orElseThrow(() -> new IllegalStateException("Missing the user registration info!"));
+
         prepareAndPublishEvent(user, info);
         return result;
     }
@@ -48,12 +50,13 @@ public class EventPublisherEmailConfirmationManager implements EmailConfirmation
     private void prepareAndPublishEvent(User user, AdvancedUserRegistrationInfo info) {
         UserRegisteredEventData eventData = UserRegisteredEventData.builder()
                 .email(info.getEmail())
-//                .countryCode(info.getCountryCode())
+                .countryCode(info.getCountryCode())
                 .birthdate(info.getBirthdate())
                 .enableNotification(info.isNotificationEnabled())
                 .gender(info.getGender())
                 .id(String.valueOf(user.getId()))
                 .build();
+
         eventPublisher.publishEvent(new UserRegisteredEvent(eventData));
     }
 }
